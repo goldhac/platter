@@ -1,0 +1,92 @@
+@import "tailwindcss";
+
+/*
+  Platter design tokens — the layered architecture from context/ui-tokens.md.
+  Components consume semantic aliases (surface / accent / hairline …) and the
+  palette utilities; never raw hex. Dark-first (v1 is dark-only, ui-tokens.md §6).
+*/
+@theme {
+  /* raw palette — "lacquer, brass, porcelain" */
+  --color-ink: #14110f;
+  --color-porcelain: #f7f4ee;
+  --color-lacquer: #8e1d1d;
+  --color-brass: #b08d4f;
+  --color-jade: #3f6b58;
+  --color-ash: #8a827a;
+
+  /* semantic aliases (the contract) */
+  --color-surface: var(--color-porcelain);
+  --color-accent: var(--color-lacquer); /* the only tenant-settable token (M3) */
+  --color-hairline: var(--color-brass);
+  --color-positive: var(--color-jade);
+  --color-muted: var(--color-ash);
+
+  /* type — bound to the next/font CSS vars set in app/layout.tsx */
+  --font-display: var(--font-fraunces), ui-serif, Georgia, serif;
+  --font-cjk: var(--font-noto-serif-sc), ui-serif, serif;
+  --font-body: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-plex-mono), ui-monospace, monospace;
+
+  /* shape & elevation */
+  --radius-card: 4px;
+  --radius-seal: 6px;
+  --shadow-plate: 0 1px 2px rgb(0 0 0 / 0.3);
+}
+
+:root {
+  color-scheme: dark;
+}
+
+body {
+  background: var(--color-ink);
+  color: var(--color-porcelain);
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Ledger-column prices & eyebrows: mono + tabular figures (ui-rules.md §2). */
+.tabular {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum";
+}
+
+/* Horizontal rails scroll; the page body never does (ui-rules.md §1). */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Offset scroll targets so the sticky search + rail header doesn't cover section tops. */
+.menu-section {
+  scroll-margin-top: 8.5rem;
+}
+
+/* Item-sheet motion — minimal for now; the shared-element transition is M7. */
+@keyframes sheet-up {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+@keyframes sheet-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@media (prefers-reduced-motion: no-preference) {
+  [data-sheet="content"][data-state="open"] {
+    animation: sheet-up 0.28s cubic-bezier(0.32, 0.72, 0, 1);
+  }
+  [data-sheet="overlay"][data-state="open"] {
+    animation: sheet-fade 0.2s ease;
+  }
+}
