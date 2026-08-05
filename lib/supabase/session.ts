@@ -36,16 +36,17 @@ export async function updateSession(request: NextRequest) {
   } = await supabase.auth.getUser();
 
   const path = request.nextUrl.pathname;
-  const isLogin = path === "/admin/login";
-  if (path.startsWith("/admin") && !isLogin && !user) {
+  // Logged-out entry points: sign in, and self-serve sign up.
+  const isPublicAdmin = path === "/admin/login" || path === "/admin/signup";
+  if (path.startsWith("/admin") && !isPublicAdmin && !user) {
     const url = request.nextUrl.clone();
     url.pathname = "/admin/login";
     return NextResponse.redirect(url);
   }
-  // Already signed in and hitting the login page → send to the manager.
-  if (isLogin && user) {
+  // Already signed in and hitting a logged-out page → send to the dashboard.
+  if (isPublicAdmin && user) {
     const url = request.nextUrl.clone();
-    url.pathname = "/admin/menu";
+    url.pathname = "/admin";
     return NextResponse.redirect(url);
   }
 

@@ -1380,6 +1380,7 @@ export type Database = {
       auth_role_in: { Args: { tid: string }; Returns: string }
       auth_tenant_id: { Args: never; Returns: string }
       auth_tenant_ids: { Args: never; Returns: string[] }
+      provision_tenant: { Args: { p_name?: string }; Returns: string }
       show_limit: { Args: never; Returns: number }
       show_trgm: { Args: { "": string }; Returns: string[] }
     }

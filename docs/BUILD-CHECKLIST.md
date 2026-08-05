@@ -77,17 +77,17 @@
 - [x] **Review + edit UI** (`components/admin/menu-import.tsx`) — upload → editable tree (menu name, groups, sections, item name/price/description, delete anything) → **commit as a DRAFT menu**; `/admin/import` leads with it (CSV demoted to "advanced"). **Never auto-publishes** (`§13 C6`).
 - [x] **Correct commit** (`lib/mutations/import-menu.ts commitParsedMenu`) — builds a real menu → groups → categories → items hierarchy (unlike the CSV path, which orphans categories); decimal-safe prices (`numeric(,2)`); unique slugs seeded from existing rows. Routes into the new menu's editor.
 - [x] Upload plumbing: 12mb server-action `bodySizeLimit`; JPG/PNG/WEBP/HEIC/PDF ≤10MB; friendly errors for bad key / rate-limit / unreadable / safety-block.
-- [ ] Self-serve **signup + wizard** (account → business → import → review → theme → claim URL) — the import step is done; the account-creation/onboarding shell + URL claim remain (ties into M7 domains). *(In-app, an existing manager can already import today.)*
+- [x] **Self-serve signup + provisioning** — `/admin/signup` (logged-out) → `provision_tenant()` SECURITY DEFINER (tenant + venue + owner staff + membership, idempotent) → `/admin/onboarding` leads with the import. A brand-new restaurant now goes from nothing → isolated tenant with a draft menu, no manual seeding.
+- [ ] Wizard polish: **business step** (currency/locale/cuisine — new venues default NGN), **theme step** (reuse the customiser), **claim-URL step** (→ M7 domains). Core funnel (account → import) is live; these are progressive.
 - [ ] Per-item **confidence** surfacing (Gemini structured output doesn't return logprobs cheaply — revisit); dup flags; CSV/paste/sample-menu variants of the same review UI
-- [ ] URL claim + reserved-subdomain blocklist (M7)
 - [ ] *(follow-up bug)* the legacy CSV import (`importItemsCsv`) creates **orphan categories** (no `group_id`) — invisible on any menu post-rescope. Point it at a target menu/group like the Gemini path does.
 
-## M7 — Domains + QR Studio  *(the Vercel cutover lives here)*
-- [ ] **Migrate hosting to Vercel** (`§13 P-Q2`): push repo to GitHub → import to Vercel → move env vars → verify → cut DNS. **Upgrade Vercel Hobby → Pro** for domain automation.
-- [ ] Update `NEXT_PUBLIC_SITE_URL`; update Supabase Auth redirect URLs
-- [ ] Host→venue resolution middleware (edge, `venue:{host}` cache tag)
-- [ ] Wildcard subdomain provisioning (`*.platter.menu`)
-- [ ] Custom-domain verify (CNAME) + auto-TLS
+## M7 — Domains + QR Studio  *(on Railway — Vercel cutover dropped, `§13 P-Q2` reconsidered 2026-08-05)*
+- [ ] **Custom + wildcard domains on Railway** — add `*.platter.menu` (wildcard domain + cert) and per-venue custom domains via Railway's domain API; no host migration.
+- [ ] Update `NEXT_PUBLIC_SITE_URL`; update Supabase Auth redirect URLs for the new hosts
+- [ ] **Host→venue resolution in the Proxy** — resolve `host` → restaurant (replaces the hardcoded `jin-canting` in the public menu), `venue:{host}` cache tag. **This is what gives new signups a live public URL.**
+- [ ] Subdomain claim (`<venue>.platter.menu`) + reserved-subdomain blocklist
+- [ ] Custom-domain verify (CNAME, `domain_verifications` table already exists) + TLS
 - [ ] **Legacy `/menu/...` 301s forever** (printed QR contract)
 - [ ] QR Studio: venue / per-menu / **per-table (bulk 1–N)** codes, styling (error-correction H), SVG/PNG/A6-PDF/A4-sheet, **scan analytics per code**
 - [ ] **`[B2]` print parity** — the studio becomes **"Print & QR Studio"**: in-theme A4 / A3 / table-tent / specials-card PDFs via `@react-pdf`, from the same menu data (print price can't disagree with the QR price). `FEATURE-BACKLOG.md`.
