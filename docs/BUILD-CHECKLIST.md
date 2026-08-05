@@ -58,12 +58,13 @@
 - [x] Abstraction extended: each layout owns its **list wrapper** (divided list / grid / stacked bands) via `layoutSpec()`. **All 4 verified rendering the same data distinctly** — 4 layouts, dark + light, 4 palettes, 20 ₦ preserved throughout.
 > Note: the plan slotted Counter/Palm *after* the ⭐ validation gate. Built now because they're cheap (a manifest + one layout component each) and complete the gallery/demo — the *expensive* work (customiser M5, import M6, billing M8) still waits on the gate, so validation-first logic holds.
 
-## M4 — App shell + menus
+## M4 — App shell + menus  *(menu-management landed; app-shell/dashboard/venues remain)*
+- [x] Data-driven theme (menu reads its theme from the DB) + public **menu switcher** (slices 1–2 — done, LIVE)
+- [x] **Menus list** (`/admin/menus`, `lib/queries/admin-menus.ts`) — cards (theme · item count · status) + **New menu** (`createMenu` → draft menu + starter group → drops you into the customiser). Nav: Menus. *(Duplicate/import variants = follow-up.)*
+- [ ] Rescope the v1 menu editor (`/admin/menu`, "Editor") under a specific menu; "move/duplicate to another menu" in bulk actions; per-menu publish state — **the bigger remaining refactor** (admin queries/mutations are still restaurant-scoped)
 - [ ] Tenant switcher + venue switcher; mobile bottom tabs + desktop sidebar; breadcrumbs
 - [ ] Dashboard (live link + QR, unpublished count, views, sold-out nudge, usage bar, setup checklist)
 - [ ] Venues list + venue detail (hours, contact, map, gallery, domains, languages)
-- [ ] Menus list (card grid) + **new-menu wizard** (blank / **duplicate deep-copy** / import)
-- [ ] Rescope the v1 menu editor under a menu; add "move/duplicate to another menu" in bulk actions; per-menu publish state
 
 ## M5 — Theme gallery + customiser  ✅ *core built (`/admin/theme`)*
 - [x] Split-screen customiser (`components/admin/theme-customiser.tsx`) + `/admin/theme` page — **live phone preview of the venue's REAL items**, re-themes as you change controls; 4-theme picker + a menu selector (theme Dinner or Bar List)

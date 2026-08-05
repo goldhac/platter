@@ -4,7 +4,8 @@ import { SignOutButton } from "@/components/admin/sign-out-button";
 import { getCurrentStaff } from "@/lib/rbac";
 
 const NAV = [
-  { href: "/admin/menu", label: "Menu" },
+  { href: "/admin/menus", label: "Menus" },
+  { href: "/admin/menu", label: "Editor" },
   { href: "/admin/categories", label: "Categories" },
   { href: "/admin/modifiers", label: "Add-ons" },
   { href: "/admin/theme", label: "Theme" },

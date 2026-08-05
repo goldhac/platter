@@ -23,6 +23,11 @@
 
 ## Entries
 
+### 2026-08-04 · feature+deploy · M4 menus-list + customiser deployed live
+- **area:** apps/admin, lib/queries, lib/mutations, infra
+- **what:** **Redeployed the M5 build to Railway** — `/admin/theme` customiser is now live in the deployed admin (deployment `b5c02106`, Online). Built M4's menu-management: `/admin/menus` (`lib/queries/admin-menus.ts` — venue's menus + per-menu item counts) with cards (theme · count · status) and a **New menu** flow (`lib/mutations/menus.ts createMenu` → draft menu + starter group → routes into the customiser). Nav gained "Menus"; the v1 item editor relabeled "Editor". **Model note (Gemini):** recorded that the AI features (M6 PDF/photo import, B5 concierge, optional B3) will use the user's **Gemini** key via a server `GEMINI_API_KEY` env var — never hardcoded or read from disk (`FEATURE-BACKLOG.md`).
+- **notes:** Build + token gate green. The customiser is build-verified (admin is auth-gated — no screenshot without the owner login) but the publish→re-theme mechanism under it is proven live. **Biggest remaining M4 piece:** rescope the item editor (`/admin/menu`) to a *specific* menu — its queries/mutations are still restaurant-scoped, so with 2 menus it shows both mixed. Also remaining: app shell, dashboard, venues list. Committing + redeploying so `/admin/menus` is live too.
+
 ### 2026-08-04 · feature · M5 — theme customiser (core built)
 - **area:** apps/admin, lib/themes, lib/mutations
 - **what:** Built the customiser: `/admin/theme` (server page — loads the selected menu's theme + real items + the tenant plan; menu selector for Dinner/Bar List) + `components/admin/theme-customiser.tsx` (client split-screen: 4-theme picker with palette swatches, accent picker (curated + hex), scheme/layout toggles, and a **live phone preview of the venue's real items** that re-themes on every change via client `resolveTheme`). Publish/Discard via `lib/mutations/theme.ts` (`publishMenuTheme` / `saveMenuThemeDraft` → `theme_config_draft`), RLS-scoped (`requireManager` + `auth_can_manage`). `lib/themes/contrast.ts` = the WCAG **blocking 4.5:1** accent guard (shown as a live ratio; publish refused below it). Plan gating (Free = Lacquer only, rest Pro-locked). Added the Theme nav link.

@@ -84,7 +84,7 @@
 
 **Where it fits.** Phase 2/3, guest feature. (Gate behind Pro — it has per-query cost.)
 
-**Depends on.** The full menu as structured context + an LLM (**Claude API** — see the `claude-api` skill). Multilingual for free.
+**Depends on.** The full menu as structured context + an LLM — **Gemini via the user's `GEMINI_API_KEY`** (server-side env var, never hardcoded/read from disk; Gemini's multimodal also powers the M6 PDF/photo import). Multilingual for free.
 
 **Build notes.** **Server-side** (keeps the client bundle lean, `§7 #6`). Feed the menu (names, tags, allergens, prices, spice) as context; return dish picks with reasons + deep-links to the item sheets. Stream the response. Cache common queries.
 
