@@ -77,12 +77,7 @@ export default async function MenuPage({
   searchParams: Promise<{ theme?: string }>;
 }) {
   const { slug } = await params;
-  // Default = the menu's theme (Lacquer for now; wired from the `menus` record in M4).
-  // `?theme=` previews any shipped theme (validated) — also powers the M5 customiser.
   const { theme } = await searchParams;
-  const themeId = theme ? getTheme(theme).id : "lacquer";
-  const layout = resolveTheme(themeId).layout;
-  const { Item, listClassName } = layoutSpec(layout);
   // /menu/[category]/[item] → the item slug is the second segment
   const initialItemSlug = slug && slug.length >= 2 ? slug[1] : null;
 
@@ -91,6 +86,13 @@ export default async function MenuPage({
     currency: menu.restaurant.currency,
     locale: menu.restaurant.locale,
   };
+
+  // Theme comes from the active menu's record (data-driven). `?theme=` previews another
+  // shipped theme — the same override the M5 customiser will use.
+  const themeId = theme ? getTheme(theme).id : menu.themeId;
+  const themeConfig = theme ? {} : menu.themeConfig;
+  const layout = resolveTheme(themeId, themeConfig).layout;
+  const { Item, listClassName } = layoutSpec(layout);
 
   // A shared deep link to an item that no longer exists → 404, not a broken sheet.
   if (initialItemSlug && !menu.itemsBySlug[initialItemSlug]) notFound();
@@ -125,7 +127,7 @@ export default async function MenuPage({
   };
 
   return (
-    <ThemeProvider themeId={themeId} className="min-h-screen">
+    <ThemeProvider themeId={themeId} config={themeConfig} className="min-h-screen">
       <div className="mx-auto max-w-xl px-5">
       <script
         type="application/ld+json"

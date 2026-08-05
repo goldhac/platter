@@ -23,6 +23,11 @@
 
 ## Entries
 
+### 2026-08-04 · feature · M4 (slice 1) — public menu is data-driven by the menus table
+- **area:** lib/queries, apps/public, lib/supabase
+- **what:** Made `getMenu(restaurantSlug, menuSlug?)` menu-aware — fetches the venue's live `menus` (with `theme_id`/`theme_config`), picks the active menu (requested slug → default → first), scopes groups + categories to it, and returns the theme + the menu list (`MenuSummary[]`, for a switcher). The public page now sources its theme from `menu.themeId`/`themeConfig` (M2's hardcoded `lacquer` removed); `?theme=` stays a preview override. **Regenerated `lib/supabase/database.types.ts`** from prod — the v1 types lacked `menus`/`memberships`/etc., which broke the build (supabase-js couldn't see the `menus` table).
+- **notes:** Build green; runtime confirms `/menu` renders `data-theme=lacquer` **sourced from the DB default menu** (flip the record's `theme_id` → the menu re-themes, no code). For v1's single default menu the scoping is a no-op (it owns every group). **Remaining for the ⭐ validation gate:** create the hotel's **Bar List** menu (`theme_id=carafe`) + assign items, and a **public menu switcher** (venue home / segmented control) so guests toggle Dinner↔Bar. Uncommitted on branch `phase2/m1-tenancy`.
+
 ### 2026-08-04 · feature · M3b — Counter + Palm (all 4 launch themes shipped; theme system complete)
 - **area:** lib/themes, components/menu
 - **what:** Built **Counter** (`card-grid`, images-required, **LIGHT** scheme, bone-white + tangerine; `CardItem` photo grid) and **Palm** (`editorial` + `list-dense`, deep-green/raffia/ochre; `EditorialItem` full-bleed bands). Extended the layout abstraction so each layout owns its **list wrapper** (`layoutSpec()` → `{ Item, listClassName }`: divided list / photo grid / stacked bands); updated the page + `MenuBoard` to use it. All 4 registered in the registry.
