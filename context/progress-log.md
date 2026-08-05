@@ -23,6 +23,11 @@
 
 ## Entries
 
+### 2026-08-04 · feature · M4 (slice 2) — public menu switcher + Bar List; ⭐ validation-gate mechanism proven
+- **area:** apps/public, components/menu, db
+- **what:** Built `components/menu/menu-switcher.tsx` (segmented control over the venue's live menus; hidden when ≤1; `?m=` selects the menu → re-fetch → re-theme). Wired into the page (reads `?m=`, passes to `getMenu`, renders the switcher). Created on **prod**: renamed the default menu "Dinner", added a **Bar List** menu (live, `theme_id=carafe`) + a Bar group + Cocktails & Wine category + 4 **draft** drink items.
+- **notes:** **Runtime-verified the validation-gate mechanism:** `/menu` = Dinner/Lacquer/red with switcher [Dinner | Bar List]; `/menu?m=bar-list` = Bar/**Carafe**/gold/ruled-list — navigating **re-themes the whole page**. Bar items are **draft on purpose** — the *deployed* old build (all-groups-by-restaurant query) would otherwise mix published Bar items into Dinner; confirmed **0 Bar items leaked** on the live site. **To finish the gate live:** deploy the new (menu-scoped) build, then publish the Bar drinks / import the full scraped bar list. That deploy is the P-Q2 Vercel cutover (M7) or an interim Railway redeploy — a decision point. Uncommitted → committing now.
+
 ### 2026-08-04 · feature · M4 (slice 1) — public menu is data-driven by the menus table
 - **area:** lib/queries, apps/public, lib/supabase
 - **what:** Made `getMenu(restaurantSlug, menuSlug?)` menu-aware — fetches the venue's live `menus` (with `theme_id`/`theme_config`), picks the active menu (requested slug → default → first), scopes groups + categories to it, and returns the theme + the menu list (`MenuSummary[]`, for a switcher). The public page now sources its theme from `menu.themeId`/`themeConfig` (M2's hardcoded `lacquer` removed); `?theme=` stays a preview override. **Regenerated `lib/supabase/database.types.ts`** from prod — the v1 types lacked `menus`/`memberships`/etc., which broke the build (supabase-js couldn't see the `menus` table).

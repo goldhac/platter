@@ -5,6 +5,7 @@ import { getMenu } from "@/lib/queries/menu";
 import { layoutSpec } from "@/components/menu/layouts";
 import { MenuBoard } from "@/components/menu/menu-board";
 import { MenuHeader } from "@/components/menu/menu-header";
+import { MenuSwitcher } from "@/components/menu/menu-switcher";
 import { ThemeProvider } from "@/components/theme/theme-provider";
 import { getTheme, resolveTheme } from "@/lib/themes";
 
@@ -74,14 +75,14 @@ export default async function MenuPage({
   searchParams,
 }: {
   params: Promise<{ slug?: string[] }>;
-  searchParams: Promise<{ theme?: string }>;
+  searchParams: Promise<{ theme?: string; m?: string }>;
 }) {
   const { slug } = await params;
-  const { theme } = await searchParams;
+  const { theme, m } = await searchParams;
   // /menu/[category]/[item] → the item slug is the second segment
   const initialItemSlug = slug && slug.length >= 2 ? slug[1] : null;
 
-  const menu = await getMenu(RESTAURANT_SLUG);
+  const menu = await getMenu(RESTAURANT_SLUG, m);
   const money: MoneyOpts = {
     currency: menu.restaurant.currency,
     locale: menu.restaurant.locale,
@@ -134,6 +135,7 @@ export default async function MenuPage({
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
       <MenuHeader restaurant={menu.restaurant} openState={menu.openState} />
+      <MenuSwitcher menus={menu.menus} activeSlug={menu.activeMenuSlug} />
 
       <MenuBoard
         itemsBySlug={menu.itemsBySlug}

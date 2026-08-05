@@ -45,10 +45,11 @@
 - [x] `ruled-list` renders with **no `{image && …}` hacks** — `RuledItem` is a SEPARATE component (not a conditional in a shared row); `components/menu/layouts.ts` (`LAYOUTS` + `layoutItem()`) selects it; layout-driven in both the server grouped view + client `MenuBoard` filtered view
 - [x] **Verified at runtime, same data → two themes:** `/menu` = list-dense/red/thumbs/0-dots; `/menu?theme=carafe` = ruled-list/gold/near-black/**20 dotted-leaders, no images**; both keep 金餐厅 + 20 ₦. Lacquer unchanged. `?theme=` preview added (also powers M5). *(Follow-up: the shared item-sheet could honor `images:'none'` too.)*
 
-## ⭐ Validation gate — prove it on the real hotel  *(both themes ready; needs M4 menu-surfacing + switcher to go live)*
-- [ ] Give Jīn Cāntīng a **Dinner** menu (Lacquer) + a **Bar List** menu (Carafe)
-- [ ] Import the scraped Bar/Drinks items into the Bar List (Carafe)
-- [ ] **⛔ Decision point:** does "themes sell"? → then commit to Counter/Palm/customiser/import/billing
+## ⭐ Validation gate — mechanism PROVEN (Dinner=Lacquer ↔ Bar=Carafe switcher works)
+- [x] Jīn Cāntīng now has a **Dinner** menu (Lacquer) + a **Bar List** menu (Carafe) in prod — default renamed "Dinner"; Bar List = live/carafe with 4 **draft** drink items
+- [x] **Public menu switcher** (`components/menu/menu-switcher.tsx`) — segmented control, hidden with 1 menu; `?m=` selects the menu. **Verified:** `/menu`=Dinner/Lacquer/red, `/menu?m=bar-list`=Bar/Carafe/gold — the whole page re-themes on switch. Deployed old build unaffected (draft items → **0 leaked**).
+- [ ] Publish the Bar drinks + import the full scraped bar list — **needs the new build deployed first** (else the old build mixes published Bar items into Dinner)
+- [ ] **⛔ Decision point:** does "themes sell"? → then commit to customiser/import/billing
 
 ## M3b — Counter + Palm  ✅ *all 4 launch themes shipped (built early — cheap, and completes the gallery)*
 - [x] **Counter** (`lib/themes/counter.ts` + `CardItem`) — `card-grid`, images-required, **light scheme**, bone-white + tangerine. Runtime: `data-layout=card-grid`, `data-scheme=light`, photo grids.
