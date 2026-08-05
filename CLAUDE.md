@@ -28,7 +28,8 @@ Add an entry to [`context/progress-log.md`](context/progress-log.md) **before en
 
 - Decisions & reasoning → `context/foundation.md` (this wins on any conflict).
 - Origin brief (wireframes, full SQL, defect audit) → `docs/PRD-jin-canting-menu.md` (superseded by foundation where they differ).
-- Scope: v1 is **menu + manager + QR, single tenant, no ordering** (`foundation.md §8`). Don't build into a later phase without being asked.
+- **Phase 2 spec** (the platform: multi-tenant venues/menus + theme system) → `docs/PRD-platter-platform-phase2.md`, reconciled with corrections in `foundation.md §13`. **Spec'd, not started** — don't build into it without being asked; two open questions there (sequencing, hosting-vs-domains) are blocking.
+- Scope: v1 is **menu + manager + QR, single tenant, no ordering** (`foundation.md §8`) — **built & deployed** (Railway, 2026-08-04). Don't build into a later phase without being asked.
 
 **Solo project.** No team/branch-lock layer. Commit only when Gold asks.
 

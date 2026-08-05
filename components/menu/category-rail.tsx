@@ -65,7 +65,7 @@ export function CategoryRail({ categories }: { categories: Chip[] }) {
             className={cn(
               "tabular shrink-0 rounded-card px-3 py-2 text-xs uppercase tracking-wider outline-none transition-colors",
               "focus-visible:ring-2 focus-visible:ring-accent/70",
-              isActive ? "bg-accent text-porcelain" : "text-muted hover:text-porcelain",
+              isActive ? "bg-accent text-text" : "text-text-secondary hover:text-text",
             )}
           >
             {c.name}

@@ -4,8 +4,9 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import type { MoneyOpts } from "@/lib/format/currency";
 import type { MenuItem } from "@/lib/queries/menu";
 import { cn } from "@/lib/utils";
+import type { LayoutId } from "@/lib/themes";
 import { CategoryRail } from "./category-rail";
-import { ItemRow } from "./item-row";
+import { layoutSpec } from "./layouts";
 import { ItemSheet } from "./item-sheet";
 
 const BASE_PATH = "/menu";
@@ -35,14 +36,17 @@ export function MenuBoard({
   money,
   initialItemSlug,
   railCategories,
+  layout,
   children,
 }: {
   itemsBySlug: Record<string, MenuItem>;
   money: MoneyOpts;
   initialItemSlug: string | null;
   railCategories: { id: string; name: string; slug: string }[];
+  layout: LayoutId;
   children: React.ReactNode;
 }) {
+  const { Item, listClassName } = layoutSpec(layout);
   const [openSlug, setOpenSlug] = useState<string | null>(
     initialItemSlug && itemsBySlug[initialItemSlug] ? initialItemSlug : null,
   );
@@ -115,14 +119,14 @@ export function MenuBoard({
 
   return (
     <div onClick={onBoardClick}>
-      <div className="sticky top-0 z-20 -mx-5 border-b border-hairline/15 bg-ink/95 px-5 pb-2 pt-2 backdrop-blur">
+      <div className="sticky top-0 z-20 -mx-5 border-b border-hairline/15 bg-bg/95 px-5 pb-2 pt-2 backdrop-blur">
         <input
           type="search"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder="Search the menu"
           aria-label="Search the menu"
-          className="w-full rounded-card border border-hairline/30 bg-black/20 px-3 py-2.5 text-sm text-porcelain outline-none focus-visible:ring-2 focus-visible:ring-accent/70"
+          className="w-full rounded-card border border-hairline/30 bg-black/20 px-3 py-2.5 text-sm text-text outline-none focus-visible:ring-2 focus-visible:ring-accent/70"
         />
         <div className="no-scrollbar mt-2 flex gap-2 overflow-x-auto">
           {FILTERS.map((f) => {
@@ -142,7 +146,7 @@ export function MenuBoard({
                 }
                 className={cn(
                   "tabular shrink-0 rounded-card px-3 py-1.5 text-[0.7rem] uppercase tracking-wider outline-none focus-visible:ring-2 focus-visible:ring-accent/70",
-                  on ? "bg-accent text-porcelain" : "border border-hairline/30 text-muted hover:text-porcelain",
+                  on ? "bg-accent text-text" : "border border-hairline/30 text-text-secondary hover:text-text",
                 )}
               >
                 {f.label}
@@ -155,7 +159,7 @@ export function MenuBoard({
 
       {searching ? (
         <div className="pb-28 pt-4">
-          <div className="tabular mb-3 flex items-center justify-between text-[0.7rem] uppercase tracking-[0.2em] text-brass">
+          <div className="tabular mb-3 flex items-center justify-between text-[0.7rem] uppercase tracking-[0.2em] text-hairline">
             <span>
               {results.length} result{results.length === 1 ? "" : "s"}
             </span>
@@ -165,20 +169,20 @@ export function MenuBoard({
                 setQuery("");
                 setFilters(new Set());
               }}
-              className="tracking-wider text-muted hover:text-porcelain"
+              className="tracking-wider text-text-secondary hover:text-text"
             >
               Clear
             </button>
           </div>
           {results.length === 0 ? (
-            <p className="text-sm text-muted">
+            <p className="text-sm text-text-secondary">
               No dishes match. Try a different search or clear the filters.
             </p>
           ) : (
-            <ul className="divide-y divide-hairline/10">
+            <ul className={listClassName}>
               {results.map((item) => (
                 <li key={item.id}>
-                  <ItemRow item={item} money={money} />
+                  <Item item={item} money={money} />
                 </li>
               ))}
             </ul>

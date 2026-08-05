@@ -14,12 +14,18 @@
   --color-jade: #3f6b58;
   --color-ash: #8a827a;
 
-  /* semantic aliases (the contract) */
+  /* semantic contract (ui-tokens.md §2) — the ONLY colors components reference.
+     Defaults below = Lacquer; per-menu values are injected by <ThemeProvider> (M2, lib/themes). */
+  --color-bg: var(--color-ink);
   --color-surface: var(--color-porcelain);
-  --color-accent: var(--color-lacquer); /* the only tenant-settable token (M3) */
+  --color-text: var(--color-porcelain);
+  --color-text-on-surface: var(--color-ink);
+  --color-text-secondary: var(--color-ash);
+  --color-accent: var(--color-lacquer); /* tenant-settable within a curated set (M5) */
+  --color-on-accent: var(--color-porcelain);
   --color-hairline: var(--color-brass);
   --color-positive: var(--color-jade);
-  --color-muted: var(--color-ash);
+  --color-muted: var(--color-ash); /* @deprecated alias (admin still uses it) — menu uses --color-text-secondary */
 
   /* type — bound to the next/font CSS vars set in app/layout.tsx */
   --font-display: var(--font-fraunces), ui-serif, Georgia, serif;

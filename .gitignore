@@ -42,3 +42,6 @@ yarn-error.log*
 .vscode/*
 !.vscode/extensions.json
 *.tsbuildinfo
+
+# local Postgres test cluster (M1 isolation harness)
+.local-pg/

@@ -24,13 +24,13 @@ export function ItemRow({ item, money }: { item: MenuItem; money: MoneyOpts }) {
       aria-disabled={soldOut || undefined}
       className={cn(
         "flex items-start justify-between gap-4 rounded-card py-4 no-underline outline-none",
-        "focus-visible:ring-2 focus-visible:ring-accent/70 focus-visible:ring-offset-2 focus-visible:ring-offset-ink",
+        "focus-visible:ring-2 focus-visible:ring-accent/70 focus-visible:ring-offset-2 focus-visible:ring-offset-bg",
         soldOut ? "opacity-50" : "cursor-pointer",
       )}
     >
       <div className="min-w-0 flex-1">
         <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
-          <span className="font-semibold leading-snug text-porcelain">{item.name}</span>
+          <span className="font-semibold leading-snug text-text">{item.name}</span>
           {soldOut ? (
             <SealMark kind="soldout" />
           ) : (
@@ -42,10 +42,10 @@ export function ItemRow({ item, money }: { item: MenuItem; money: MoneyOpts }) {
           )}
         </div>
         {item.description && (
-          <p className="mt-1 line-clamp-1 text-sm leading-relaxed text-muted">{item.description}</p>
+          <p className="mt-1 line-clamp-1 text-sm leading-relaxed text-text-secondary">{item.description}</p>
         )}
-        <div className="tabular mt-1.5 text-sm text-porcelain/90">
-          {soldOut ? <span className="text-muted">Sold out today</span> : price}
+        <div className="tabular mt-1.5 text-sm text-text/90">
+          {soldOut ? <span className="text-text-secondary">Sold out today</span> : price}
         </div>
       </div>
       <ItemThumb src={item.image_url} alt={item.name} size={72} />

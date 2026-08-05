@@ -2,6 +2,10 @@
 
 Next.js 16 runs on Railway as a long-lived Node server (`next start`, which binds to Railway's `$PORT`). `railway.json` pins the build (Nixpacks) and start command. Everything is dynamically rendered, so no edge/ISR config is needed.
 
+> **Live deployment (Jīn Cāntīng):** project `platter` on Railway → domain **`https://platter-production-946c.up.railway.app`**. That domain is the value of `NEXT_PUBLIC_SITE_URL` and the Supabase Auth redirect below.
+
+> **Node version — this bit us once.** Next.js 16 requires **Node ≥ 20.9**. Nixpacks defaults to Node **18**, which fails the build silently-ish (`next build` errors). This repo pins Node three ways so it can't regress: `engines.node` in `package.json`, a `.nvmrc` (`22`), and the Railway variable `NIXPACKS_NODE_VERSION=22`. Keep all three.
+
 ## 1. Env vars (set these in Railway → Variables)
 
 **Important:** the `NEXT_PUBLIC_*` values are inlined into the client bundle **at build time**, so they must be set in Railway *before* the first build.

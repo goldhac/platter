@@ -21,8 +21,8 @@ export function SealMark({ kind, className }: { kind: SealKind; className?: stri
       className={cn(
         "inline-flex h-5 w-5 shrink-0 select-none items-center justify-center rounded-seal font-cjk text-[0.7rem] leading-none",
         soldout
-          ? "text-muted line-through ring-1 ring-inset ring-hairline/50"
-          : "bg-accent text-porcelain",
+          ? "text-text-secondary line-through ring-1 ring-inset ring-hairline/50"
+          : "bg-accent text-on-accent",
         className,
       )}
     >

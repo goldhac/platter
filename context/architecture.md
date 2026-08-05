@@ -89,6 +89,8 @@ The data model is the PRD's schema (`docs/PRD-jin-canting-menu.md §8`) **plus a
 
 ### The tenant seam (new vs. the PRD)
 
+> **Phase 2 supersedes parts of this section.** What follows describes the **v1-built** seam. Phase 2 (`foundation.md §13`, `docs/PRD-platter-platform-phase2.md`) deepens it: a **`venue`** layer between tenant and menu, a new **`menu`** layer, **`memberships`** (venue-scoped roles) replacing single-tenant `staff` scoping, `auth_tenant_ids()` (array, reading `memberships`) replacing `auth_tenant_id()`, and slug/custom-domain moving onto **`venues`**. Where they differ, **§13 wins**; the notes below are v1 only.
+
 ```sql
 -- NEW: the account layer above restaurants
 create table tenants (
@@ -121,7 +123,7 @@ Full policy is owned by [`security.md`](security.md); the mechanism:
 ### Routing → tenant resolution
 
 - **v1 (single tenant):** the public menu serves at the root domain; the one tenant is resolved by config/env. No subdomain logic needed.
-- **SaaS phase (⬜):** middleware resolves the tenant from the request host — `{tenant-slug}.platter.app` (`tenants.slug`) or a `custom_domain` — and scopes every query to that `tenant_id`. The columns exist now so this is additive, not a migration.
+- **Phase 2 (⬜):** middleware resolves the **venue** from the request host — `{venue-slug}.platter.menu` (`venues.slug`) or a venue `custom_domain` — and scopes every query to that `tenant_id`; marketing at `platter.app`, app at `app.platter.app`. (Revises the earlier `{tenant-slug}.platter.app` sketch — see `foundation.md §13 P7` + Phase 2 PRD §7.) The seam columns exist now so this is additive, not a migration.
 
 ## Caching model
 

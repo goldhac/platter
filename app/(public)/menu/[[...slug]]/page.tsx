@@ -2,9 +2,11 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { formatMoney, type MoneyOpts } from "@/lib/format/currency";
 import { getMenu } from "@/lib/queries/menu";
-import { ItemRow } from "@/components/menu/item-row";
+import { layoutSpec } from "@/components/menu/layouts";
 import { MenuBoard } from "@/components/menu/menu-board";
 import { MenuHeader } from "@/components/menu/menu-header";
+import { ThemeProvider } from "@/components/theme/theme-provider";
+import { getTheme, resolveTheme } from "@/lib/themes";
 
 // v1 single-tenant; per-tenant routing + real tag caching arrive later
 // (foundation.md §12 #3, §9). Dynamic for now so sold-out/edits show immediately.
@@ -69,10 +71,18 @@ export async function generateMetadata({
 
 export default async function MenuPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ slug?: string[] }>;
+  searchParams: Promise<{ theme?: string }>;
 }) {
   const { slug } = await params;
+  // Default = the menu's theme (Lacquer for now; wired from the `menus` record in M4).
+  // `?theme=` previews any shipped theme (validated) — also powers the M5 customiser.
+  const { theme } = await searchParams;
+  const themeId = theme ? getTheme(theme).id : "lacquer";
+  const layout = resolveTheme(themeId).layout;
+  const { Item, listClassName } = layoutSpec(layout);
   // /menu/[category]/[item] → the item slug is the second segment
   const initialItemSlug = slug && slug.length >= 2 ? slug[1] : null;
 
@@ -115,7 +125,8 @@ export default async function MenuPage({
   };
 
   return (
-    <div className="mx-auto max-w-xl px-5">
+    <ThemeProvider themeId={themeId} className="min-h-screen">
+      <div className="mx-auto max-w-xl px-5">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
@@ -127,12 +138,13 @@ export default async function MenuPage({
         money={money}
         initialItemSlug={initialItemSlug}
         railCategories={railCategories}
+        layout={layout}
       >
         <div className="pb-28">
           {menu.groups.map((group) => (
             <div key={group.id}>
               <div className="mt-8 flex items-baseline gap-2 border-b border-hairline/20 pb-2">
-                <span className="font-display text-lg text-porcelain/90">{group.name}</span>
+                <span className="font-display text-lg text-text/90">{group.name}</span>
                 {group.name_zh && (
                   <span className="font-cjk text-sm text-accent/80">{group.name_zh}</span>
                 )}
@@ -140,13 +152,13 @@ export default async function MenuPage({
 
               {group.categories.map((cat) => (
                 <section key={cat.id} id={`cat-${cat.slug}`} className="menu-section">
-                  <h2 className="tabular pt-5 text-[0.72rem] uppercase tracking-[0.22em] text-brass">
+                  <h2 className="tabular pt-5 text-[0.72rem] uppercase tracking-[0.22em] text-hairline">
                     {cat.name}
                   </h2>
-                  <ul className="divide-y divide-hairline/10">
+                  <ul className={listClassName}>
                     {cat.items.map((item) => (
                       <li key={item.id}>
-                        <ItemRow item={item} money={money} />
+                        <Item item={item} money={money} />
                       </li>
                     ))}
                   </ul>
@@ -156,6 +168,7 @@ export default async function MenuPage({
           ))}
         </div>
       </MenuBoard>
-    </div>
+      </div>
+    </ThemeProvider>
   );
 }

@@ -4,6 +4,8 @@
 
 **Status key:** ⬜ planned · 🟡 in progress · ✅ built
 
+> **v1 is ✅ built & deployed (2026-08-04)** — every node below through the polish gate is done and live on Railway (`platter-production-946c.up.railway.app`); the trail is in `progress-log.md`. This v1 graph is kept as the dependency record. **Phase 2 (the platform) has its own graph at the bottom of this file**, its spec in `docs/PRD-platter-platform-phase2.md`, and its decisions in `foundation.md §13`.
+
 ---
 
 ## Layer 0 — foundational prerequisites (nothing real ships before these)
@@ -64,6 +66,30 @@ Nothing above the line should be built while the contract is still moving. This 
 
 **Draft/publish [M4] vs. the sold-out toggle [M3].** They share the cache layer but pull in opposite directions: publish is *deliberate and batched* (`revalidateTag` on a publish action), while sold-out must be *instant and bypass publish* (revalidate immediately). If the cache wiring is built assuming "all menu changes flow through publish," the sold-out path breaks the <5s requirement (`foundation.md §7 #8`). **Resolve it by building the availability path as a separate, immediate revalidation from day one** — don't retrofit it through the publish flow later. Stated honestly rather than resolved by fiat: this is the sequencing trap most likely to bite.
 
-## Explicitly out of scope of this graph
+## Phase 2 — the platform (⬜ not started)
 
-Payments, translations, the SaaS product surface (signup/billing/subdomains/tenant console), POS, native apps, delivery logistics — deferred phases (`foundation.md §8`). The **data model** already carries the tenant seam, so the SaaS surface is additive, not a re-migration.
+> Spec: `docs/PRD-platter-platform-phase2.md` · decisions + corrections: `foundation.md §13`. Same reading rule — a map of what-requires-what, not a timeline. Milestone tags M1–M10 mirror the Phase 2 PRD §16. **M1 is the new keystone; nothing else starts until isolation is proven.**
+
+### The Phase 2 keystone
+**M1 — tenancy seam + isolation suite green.** `tenants`/`memberships`/`venues`/`menus`/`menu_schedules`; `tenant_id` on every scoped table; `auth_tenant_ids()` + full RLS; backfill Jīn Cāntīng **incl. the owner membership** (`§13 C3`); `tests/isolation.spec.ts` green for every scoped table × 4 roles × 2 tenants. **No UI. Run it on a Supabase branch first (`§13 C2`).** Everything below hard-requires M1.
+
+### Dependency edges (X needs Y)
+- **M2 theme system** *needs* M1 (menus carry `theme_id`/`theme_config`). Registry + `ThemeManifest` + SSR `ThemeProvider` (no FOUC) + the four layout components + per-theme fonts + the **no-raw-color ESLint gate**. Port v1 → **Lacquer** with a screenshot-diff (zero visual regression).
+- **M3 themes 2–4** (Counter, Palm, **Carafe last**) *needs* M2. Carafe (`images:'none'`) is the abstraction proof. Review note: keep layouts as **N components sharing a strict token contract**, not one parametric mega-component — don't chase "zero conditionals" purity past the point it earns.
+- **M4 app shell + menus** *needs* M1. Tenant/venue switchers, dashboard, venues + menus lists, new-menu wizard, **duplicate-menu** (deep copy), rescope the v1 editor under a menu, breadcrumbs.
+- **M5 theme gallery + customiser** *needs* M2 + M4. Real-data phone preview, **blocking** contrast check, draft/publish via `theme_config_draft`, plan gating.
+- **M6 onboarding + import** *needs* M1 + M4 + Lacquer (M2). Signup, 6-step wizard, PDF/photo→schema extraction with a confidence review table (`§13 C6`), CSV/paste/sample paths, URL claim + reserved blocklist.
+- **M7 domains + QR Studio** *needs* M1 **and P-Q2 resolved first** (`foundation.md §13` — hosting vs domains is foundation-level). Host→venue middleware, subdomain provisioning, custom-domain verify + TLS, legacy 301s, QR Studio + per-table codes + scan analytics.
+- **M8 billing + team** *needs* M1 (memberships) + `lib/plans.ts`. Paystack + Stripe → one normalized `subscriptions` row, webhooks, trial, dunning (**menus stay live — `§13 C1`**), invites/roles/audit log.
+- **M9 marketing + discover + analytics** *needs* M2/M3 (themes for the hero) + M8 (pricing). `/discover` **curated-only** for now (`§13 C7`).
+- **M10 hardening** *needs* everything — all six CI gates green across all four themes; load-test 100 tenants / 20k items.
+
+### Cheapest validation path (if P-Q1 = validation-first)
+M1 → M2 (**Lacquer only**, extracted) → **Carafe** (one contrasting theme) → run both live on the hotel's Dinner + Bar menus as the sales proof. Defer the rest of M3, the M5 customiser, M6 import, and M8 billing until a second tenant is committed — roughly half the M2–M8 spend before the "themes sell" bet is tested.
+
+### The Phase 2 tension to watch
+The PRD order front-loads the expensive differentiator (4 themes + customiser: M2/M3/M5) ahead of revenue (M8) and self-serve onboarding (M6), so the core bet is validated late. Resolve via **P-Q1** (`foundation.md §13`).
+
+## Explicitly out of scope of both graphs
+
+Phase 3 — ordering (cart / checkout / realtime order-board), payments on orders, POS, native apps, delivery logistics, theme marketplace, public API, loyalty, reservations (`foundation.md §8`). The **data model** already carries the tenant seam, so Phase 2 is additive, not a re-migration.

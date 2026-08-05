@@ -34,7 +34,7 @@ export function ItemSheet({
         <Dialog.Content
           data-sheet="content"
           aria-describedby={item?.description ? undefined : "sheet-no-desc"}
-          className="fixed inset-x-0 bottom-0 z-50 mx-auto max-h-[92vh] w-full max-w-xl overflow-y-auto rounded-t-2xl border-t border-hairline/25 bg-ink pb-8 shadow-plate outline-none"
+          className="fixed inset-x-0 bottom-0 z-50 mx-auto max-h-[92vh] w-full max-w-xl overflow-y-auto rounded-t-2xl border-t border-hairline/25 bg-bg pb-8 shadow-plate outline-none"
         >
           {item ? (
             <SheetBody item={item} money={money} />
@@ -52,7 +52,7 @@ function SheetBody({ item, money }: { item: MenuItem; money: MoneyOpts }) {
 
   return (
     <div className="px-5">
-      <div className="sticky top-0 -mx-5 flex justify-center bg-ink/95 py-3 backdrop-blur">
+      <div className="sticky top-0 -mx-5 flex justify-center bg-bg/95 py-3 backdrop-blur">
         <span aria-hidden className="h-1 w-10 rounded-full bg-hairline/50" />
       </div>
 
@@ -74,7 +74,7 @@ function SheetBody({ item, money }: { item: MenuItem; money: MoneyOpts }) {
 
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
-          <Dialog.Title className="font-display text-2xl leading-tight text-porcelain">
+          <Dialog.Title className="font-display text-2xl leading-tight text-text">
             {item.name}
           </Dialog.Title>
           {item.name_zh && <div className="mt-0.5 font-cjk text-accent">{item.name_zh}</div>}
@@ -89,7 +89,7 @@ function SheetBody({ item, money }: { item: MenuItem; money: MoneyOpts }) {
       <div className="my-4 h-px bg-hairline/20" />
 
       {item.description ? (
-        <Dialog.Description className="text-sm leading-relaxed text-muted">
+        <Dialog.Description className="text-sm leading-relaxed text-text-secondary">
           {item.description}
         </Dialog.Description>
       ) : (
@@ -100,7 +100,7 @@ function SheetBody({ item, money }: { item: MenuItem; money: MoneyOpts }) {
 
       {item.variants.length > 0 ? (
         <div className="mt-6">
-          <div className="tabular mb-2 text-[0.7rem] uppercase tracking-[0.2em] text-brass">
+          <div className="tabular mb-2 text-[0.7rem] uppercase tracking-[0.2em] text-hairline">
             Portion
           </div>
           <div className="flex flex-wrap gap-2">
@@ -112,8 +112,8 @@ function SheetBody({ item, money }: { item: MenuItem; money: MoneyOpts }) {
                   v.is_available ? "border-hairline/40" : "border-hairline/20 opacity-50",
                 )}
               >
-                <div className="text-sm text-porcelain">{v.label}</div>
-                <div className="tabular mt-0.5 text-sm text-porcelain/90">
+                <div className="text-sm text-text">{v.label}</div>
+                <div className="tabular mt-0.5 text-sm text-text/90">
                   {formatMoney(v.price, money)}
                 </div>
               </div>
@@ -121,7 +121,7 @@ function SheetBody({ item, money }: { item: MenuItem; money: MoneyOpts }) {
           </div>
         </div>
       ) : (
-        <div className="tabular mt-6 text-xl text-porcelain">
+        <div className="tabular mt-6 text-xl text-text">
           {formatMoney(item.base_price, money)}
         </div>
       )}
@@ -139,26 +139,26 @@ function SheetBody({ item, money }: { item: MenuItem; money: MoneyOpts }) {
               />
             ))}
           </span>
-          <span className="text-muted">Spice · {spiceLabel(item.spice_level)}</span>
+          <span className="text-text-secondary">Spice · {spiceLabel(item.spice_level)}</span>
         </div>
       )}
 
       {(dietary.length > 0 || item.allergens.length > 0) && (
         <div className="mt-6 border-t border-hairline/15 pt-4">
-          <div className="tabular mb-2 text-[0.7rem] uppercase tracking-[0.2em] text-brass">
+          <div className="tabular mb-2 text-[0.7rem] uppercase tracking-[0.2em] text-hairline">
             Allergens &amp; dietary
           </div>
           <div className="flex flex-wrap gap-1.5 text-xs">
             {dietary.map((t) => (
               <span
                 key={t}
-                className="rounded-card border border-hairline/30 px-2 py-1 text-muted"
+                className="rounded-card border border-hairline/30 px-2 py-1 text-text-secondary"
               >
                 {prettyDietary(t)}
               </span>
             ))}
             {item.allergens.map((a) => (
-              <span key={a} className="rounded-card px-2 py-1 text-muted/80">
+              <span key={a} className="rounded-card px-2 py-1 text-text-secondary/80">
                 Contains {prettyAllergen(a).toLowerCase()}
               </span>
             ))}
@@ -166,7 +166,7 @@ function SheetBody({ item, money }: { item: MenuItem; money: MoneyOpts }) {
         </div>
       )}
 
-      <Dialog.Close className="mt-7 w-full rounded-card border border-hairline/30 py-3 text-sm text-muted outline-none transition-colors hover:text-porcelain focus-visible:ring-2 focus-visible:ring-accent/70">
+      <Dialog.Close className="mt-7 w-full rounded-card border border-hairline/30 py-3 text-sm text-text-secondary outline-none transition-colors hover:text-text focus-visible:ring-2 focus-visible:ring-accent/70">
         Close
       </Dialog.Close>
     </div>
