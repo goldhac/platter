@@ -50,8 +50,19 @@ import { SoldOutToggle } from "./sold-out-toggle";
 
 type Selection = { selected: Set<string>; toggle: (id: string) => void };
 const SelectionCtx = createContext<Selection | null>(null);
+// The active menu slug, so deep rows (Edit links) keep the editor's menu scope.
+const MenuScopeCtx = createContext<string>("");
 
-export function MenuTree({ tree, money }: { tree: AdminTree; money: MoneyOpts }) {
+export function MenuTree({
+  tree,
+  money,
+  activeSlug = "",
+}: {
+  tree: AdminTree;
+  money: MoneyOpts;
+  activeSlug?: string;
+}) {
+  const menuQ = activeSlug ? `?m=${activeSlug}` : "";
   const [filter, setFilter] = useState("");
   const q = filter.trim().toLowerCase();
 
@@ -88,6 +99,7 @@ export function MenuTree({ tree, money }: { tree: AdminTree; money: MoneyOpts })
   }, [tree]);
 
   return (
+    <MenuScopeCtx.Provider value={activeSlug}>
     <SelectionCtx.Provider value={{ selected, toggle }}>
       <div className={selected.size > 0 ? "pb-24" : undefined}>
         <div className="flex items-center gap-2 pb-4">
@@ -99,13 +111,13 @@ export function MenuTree({ tree, money }: { tree: AdminTree; money: MoneyOpts })
           className="w-full rounded-card border border-hairline/30 bg-black/20 px-3 py-2 text-sm text-porcelain outline-none focus-visible:ring-2 focus-visible:ring-accent/70"
         />
         <Link
-          href="/admin/categories"
+          href={`/admin/categories${menuQ}`}
           className="tabular shrink-0 rounded-card border border-hairline/30 px-3 py-2 text-xs uppercase tracking-wider text-muted hover:text-porcelain"
         >
           Categories
         </Link>
         <Link
-          href="/admin/items/new"
+          href={`/admin/items/new${menuQ}`}
           className="tabular shrink-0 rounded-card bg-accent px-3 py-2 text-xs uppercase tracking-wider text-porcelain"
         >
           + Item
@@ -148,6 +160,7 @@ export function MenuTree({ tree, money }: { tree: AdminTree; money: MoneyOpts })
         />
       )}
     </SelectionCtx.Provider>
+    </MenuScopeCtx.Provider>
   );
 }
 
@@ -271,6 +284,7 @@ function ItemBody({ item, money }: { item: AdminItem; money: MoneyOpts }) {
   const [pending, start] = useTransition();
   const published = item.status === "published";
   const selection = useContext(SelectionCtx);
+  const menuSlug = useContext(MenuScopeCtx);
 
   function togglePublish() {
     start(async () => {
@@ -352,7 +366,7 @@ function ItemBody({ item, money }: { item: AdminItem; money: MoneyOpts }) {
       <SoldOutToggle itemId={item.id} itemName={item.name} available={item.is_available} />
 
       <Link
-        href={`/admin/items/${item.id}`}
+        href={`/admin/items/${item.id}${menuSlug ? `?m=${menuSlug}` : ""}`}
         className="tabular text-[0.65rem] uppercase tracking-wider text-muted hover:text-porcelain"
       >
         Edit

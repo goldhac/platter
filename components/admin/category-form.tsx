@@ -24,12 +24,16 @@ const label = "mb-1 block text-xs uppercase tracking-wider text-muted";
 export function CategoryForm({
   groups,
   initial,
+  menuSlug,
 }: {
   groups: { id: string; name: string }[];
   initial?: EditableCategory;
+  /** When set, this category is being created inside a menu's editor — return there. */
+  menuSlug?: string;
 }) {
   const router = useRouter();
   const editing = !!initial;
+  const returnTo = menuSlug ? `/admin/menu?m=${menuSlug}` : "/admin/categories";
   const {
     register,
     handleSubmit,
@@ -40,7 +44,7 @@ export function CategoryForm({
       name_zh: initial?.name_zh ?? "",
       description: initial?.description ?? "",
       slug: initial?.slug ?? "",
-      group_id: initial?.group_id ?? "",
+      group_id: initial?.group_id ?? (menuSlug ? (groups[0]?.id ?? "") : ""),
       available_from: initial?.available_from?.slice(0, 5) ?? "",
       available_to: initial?.available_to?.slice(0, 5) ?? "",
       is_active: initial?.is_active ?? true,
@@ -64,7 +68,7 @@ export function CategoryForm({
       return;
     }
     toast.success(editing ? "Category saved" : "Category created");
-    router.push("/admin/categories");
+    router.push(returnTo);
     router.refresh();
   }
 
@@ -130,7 +134,7 @@ export function CategoryForm({
         </button>
         <button
           type="button"
-          onClick={() => router.push("/admin/categories")}
+          onClick={() => router.push(returnTo)}
           className="rounded-card border border-hairline/30 px-4 py-2.5 text-sm text-muted hover:text-porcelain"
         >
           Cancel

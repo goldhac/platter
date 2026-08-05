@@ -37,13 +37,27 @@ export async function getAdminCategories(): Promise<AdminCategoryRow[]> {
   }));
 }
 
-export async function getGroupOptions(): Promise<{ id: string; name: string }[]> {
+/** Group options for the category picker, scoped to one menu when a slug is given. */
+export async function getGroupOptions(menuSlug?: string): Promise<{ id: string; name: string }[]> {
   const supabase = await createClient();
+
+  let menuId: string | null = null;
+  if (menuSlug) {
+    const { data: menu } = await supabase
+      .from("menus")
+      .select("id")
+      .eq("slug", menuSlug)
+      .maybeSingle();
+    menuId = menu?.id ?? null;
+  }
+
   const { data } = await supabase
     .from("menu_groups")
-    .select("id, name, sort_order")
+    .select("id, name, menu_id, sort_order")
     .order("sort_order");
-  return (data ?? []).map((g) => ({ id: g.id, name: g.name }));
+  return (data ?? [])
+    .filter((g) => menuId == null || g.menu_id === menuId)
+    .map((g) => ({ id: g.id, name: g.name }));
 }
 
 export type EditableCategory = {

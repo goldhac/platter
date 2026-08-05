@@ -43,15 +43,19 @@ export function ItemForm({
   tenantId,
   modifierGroups,
   initialModifierGroupIds,
+  menuSlug,
 }: {
   categories: { id: string; name: string }[];
   initial?: EditableItem;
   tenantId: string;
   modifierGroups: { id: string; name: string }[];
   initialModifierGroupIds: string[];
+  /** Which menu's editor to return to after save/cancel. */
+  menuSlug?: string;
 }) {
   const router = useRouter();
   const editing = !!initial;
+  const returnTo = menuSlug ? `/admin/menu?m=${menuSlug}` : "/admin/menu";
   const [imageUrl, setImageUrl] = useState<string | null>(initial?.image_url ?? null);
   const [variants, setVariants] = useState<{ label: string; price: string }[]>(
     initial?.variants.map((v) => ({ label: v.label, price: String(v.price) })) ?? [],
@@ -121,7 +125,7 @@ export function ItemForm({
       }
     }
     toast.success(editing ? "Item saved" : "Item created (draft)");
-    router.push("/admin/menu");
+    router.push(returnTo);
     router.refresh();
   }
 
@@ -302,7 +306,7 @@ export function ItemForm({
         </button>
         <button
           type="button"
-          onClick={() => router.push("/admin/menu")}
+          onClick={() => router.push(returnTo)}
           className="rounded-card border border-hairline/30 px-4 py-2.5 text-sm text-muted hover:text-porcelain"
         >
           Cancel
