@@ -72,12 +72,15 @@
 - [x] Scheme + layout toggles (only the theme's declared options); **Publish** (`publishMenuTheme`) / **Discard**; draft save (`saveMenuThemeDraft` → `theme_config_draft`); plan gating (Free = Lacquer, others **Pro**-locked)
 - [ ] *(follow-up)* full "Reset to defaults", preview toggles (item-sheet/search states); **visual test needs an owner login** (build-verified only so far — the underlying publish→re-theme mechanism is already proven live)
 
-## M6 — Onboarding + import
-- [ ] Signup + the 6-step wizard (account → business → get-menu-in → review → theme → claim URL)
-- [ ] PDF/photo → schema extraction (vision model), per-item **confidence**
-- [ ] **Review table** — low-confidence highlight, price regex re-check, dup flags; **never auto-publish** (draft only); sell the review, not raw accuracy (`§13 C6`)
-- [ ] CSV / paste / sample-menu paths
-- [ ] URL claim + reserved-subdomain blocklist
+## M6 — Onboarding + import  *(the AI import wedge is built & live)*
+- [x] **PDF/photo → structured menu (Gemini)** — `lib/ai/gemini.ts` (REST, no SDK; `gemini-2.5-flash`; `responseSchema`-enforced JSON; key via `GEMINI_API_KEY` only). **Live-tested** on a known 11-item menu: 100% of items/prices/sections correct, £ symbols stripped + decimals kept, 🌶→spice, (v)→vegetarian, smart squid→seafood / guanciale→contains_pork. ~9s/page.
+- [x] **Review + edit UI** (`components/admin/menu-import.tsx`) — upload → editable tree (menu name, groups, sections, item name/price/description, delete anything) → **commit as a DRAFT menu**; `/admin/import` leads with it (CSV demoted to "advanced"). **Never auto-publishes** (`§13 C6`).
+- [x] **Correct commit** (`lib/mutations/import-menu.ts commitParsedMenu`) — builds a real menu → groups → categories → items hierarchy (unlike the CSV path, which orphans categories); decimal-safe prices (`numeric(,2)`); unique slugs seeded from existing rows. Routes into the new menu's editor.
+- [x] Upload plumbing: 12mb server-action `bodySizeLimit`; JPG/PNG/WEBP/HEIC/PDF ≤10MB; friendly errors for bad key / rate-limit / unreadable / safety-block.
+- [ ] Self-serve **signup + wizard** (account → business → import → review → theme → claim URL) — the import step is done; the account-creation/onboarding shell + URL claim remain (ties into M7 domains). *(In-app, an existing manager can already import today.)*
+- [ ] Per-item **confidence** surfacing (Gemini structured output doesn't return logprobs cheaply — revisit); dup flags; CSV/paste/sample-menu variants of the same review UI
+- [ ] URL claim + reserved-subdomain blocklist (M7)
+- [ ] *(follow-up bug)* the legacy CSV import (`importItemsCsv`) creates **orphan categories** (no `group_id`) — invisible on any menu post-rescope. Point it at a target menu/group like the Gemini path does.
 
 ## M7 — Domains + QR Studio  *(the Vercel cutover lives here)*
 - [ ] **Migrate hosting to Vercel** (`§13 P-Q2`): push repo to GitHub → import to Vercel → move env vars → verify → cut DNS. **Upgrade Vercel Hobby → Pro** for domain automation.
