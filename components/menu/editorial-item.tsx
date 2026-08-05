@@ -8,14 +8,22 @@ import { cn } from "@/lib/utils";
  * beneath on the ground. Images optional — a missing photo falls back to a mark. Text sits on
  * the page ground (not a card), so it uses `text` / `text-secondary`.
  */
-export function EditorialItem({ item, money }: { item: MenuItem; money: MoneyOpts }) {
+export function EditorialItem({
+  item,
+  money,
+  basePath = "/menu",
+}: {
+  item: MenuItem;
+  money: MoneyOpts;
+  basePath?: string;
+}) {
   const soldOut = !item.is_available;
   const price =
     item.from_price != null ? formatFrom(item.from_price, money) : formatMoney(item.base_price, money);
 
   return (
     <a
-      href={`/menu/${item.category_slug}/${item.slug}`}
+      href={`${basePath}/${item.category_slug}/${item.slug}`}
       data-item-slug={item.slug}
       aria-disabled={soldOut || undefined}
       className={cn(

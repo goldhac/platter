@@ -83,12 +83,12 @@
 - [ ] *(follow-up bug)* the legacy CSV import (`importItemsCsv`) creates **orphan categories** (no `group_id`) — invisible on any menu post-rescope. Point it at a target menu/group like the Gemini path does.
 
 ## M7 — Domains + QR Studio  *(on Railway — Vercel cutover dropped, `§13 P-Q2` reconsidered 2026-08-05)*
-- [ ] **Custom + wildcard domains on Railway** — add `*.platter.menu` (wildcard domain + cert) and per-venue custom domains via Railway's domain API; no host migration.
-- [ ] Update `NEXT_PUBLIC_SITE_URL`; update Supabase Auth redirect URLs for the new hosts
-- [ ] **Host→venue resolution in the Proxy** — resolve `host` → restaurant (replaces the hardcoded `jin-canting` in the public menu), `venue:{host}` cache tag. **This is what gives new signups a live public URL.**
-- [ ] Subdomain claim (`<venue>.platter.menu`) + reserved-subdomain blocklist
-- [ ] Custom-domain verify (CNAME, `domain_verifications` table already exists) + TLS
-- [ ] **Legacy `/menu/...` 301s forever** (printed QR contract)
+- [x] **Host→venue resolution (code)** — `lib/venue/resolve.ts`: `host` → venue via custom_domain → `<slug>.<PLATFORM_DOMAIN>` subdomain → apex-falls-back-to-flagship (printed-QR back-compat). Public menu is no longer hardcoded to `jin-canting`. Shared renderer (`components/menu/menu-screen.tsx`) + metadata, `basePath`-parameterized; `basePath` threaded through MenuBoard shallow-routing + the 4 layout item hrefs. **Local-verified** (flagship unchanged, venue-correct hrefs, 404s).
+- [x] **`/v/<slug>` path route** — a working public URL for every venue **today**, before any DNS (the interim shareable link until a subdomain is claimed).
+- [ ] *(infra — Gold)* Buy `platter.menu`; add it + `*.platter.menu` (wildcard cert) as domains in the **Railway dashboard**; point DNS. Then set `NEXT_PUBLIC_PLATFORM_DOMAIN=platter.menu` + `NEXT_PUBLIC_SITE_URL` on Railway → subdomains light up with zero code change. Update Supabase Auth redirect URLs for the new hosts.
+- [ ] Subdomain **claim UI** (settings: pick `<slug>`, reserved-blocklist already in `resolve.ts`, uniqueness) + custom-domain add (CNAME verify via the existing `domain_verifications` table) + TLS
+- [ ] Per-venue **`/api/og`** (currently flagship-only images) + `venue:{host}` tag caching (drop `force-dynamic`)
+- [ ] **Legacy `/menu/...` 301s forever** (printed QR contract — the apex `/menu` already stays the flagship)
 - [ ] QR Studio: venue / per-menu / **per-table (bulk 1–N)** codes, styling (error-correction H), SVG/PNG/A6-PDF/A4-sheet, **scan analytics per code**
 - [ ] **`[B2]` print parity** — the studio becomes **"Print & QR Studio"**: in-theme A4 / A3 / table-tent / specials-card PDFs via `@react-pdf`, from the same menu data (print price can't disagree with the QR price). `FEATURE-BACKLOG.md`.
 

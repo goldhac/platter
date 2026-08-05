@@ -9,8 +9,6 @@ import { CategoryRail } from "./category-rail";
 import { layoutSpec } from "./layouts";
 import { ItemSheet } from "./item-sheet";
 
-const BASE_PATH = "/menu";
-
 const FILTERS: { key: string; label: string; test: (it: MenuItem) => boolean }[] = [
   { key: "vegetarian", label: "Vegetarian", test: (it) => it.dietary_tags.includes("vegetarian") },
   {
@@ -37,6 +35,7 @@ export function MenuBoard({
   initialItemSlug,
   railCategories,
   layout,
+  basePath = "/menu",
   children,
 }: {
   itemsBySlug: Record<string, MenuItem>;
@@ -44,6 +43,8 @@ export function MenuBoard({
   initialItemSlug: string | null;
   railCategories: { id: string; name: string; slug: string }[];
   layout: LayoutId;
+  /** Where this venue lives publicly ("/menu" or "/v/<slug>") — item deep-links hang off it. */
+  basePath?: string;
   children: React.ReactNode;
 }) {
   const { Item, listClassName } = layoutSpec(layout);
@@ -57,27 +58,30 @@ export function MenuBoard({
       const item = itemsBySlug[slug];
       if (!item) return;
       setOpenSlug(slug);
-      window.history.pushState(null, "", `${BASE_PATH}/${item.category_slug}/${slug}`);
+      window.history.pushState(null, "", `${basePath}/${item.category_slug}/${slug}`);
     },
-    [itemsBySlug],
+    [itemsBySlug, basePath],
   );
 
   const close = useCallback(() => {
     setOpenSlug((current) => {
-      if (current) window.history.pushState(null, "", BASE_PATH);
+      if (current) window.history.pushState(null, "", basePath);
       return null;
     });
-  }, []);
+  }, [basePath]);
 
   useEffect(() => {
     const onPop = () => {
-      const parts = window.location.pathname.split("/").filter(Boolean);
-      const slug = parts[0] === "menu" && parts.length >= 3 ? parts[2] : null;
+      const path = window.location.pathname;
+      // Relative to basePath, the URL is /<category>/<item>; the item is the 2nd segment.
+      const rest = path.startsWith(basePath) ? path.slice(basePath.length) : "";
+      const seg = rest.split("/").filter(Boolean);
+      const slug = seg.length >= 2 ? seg[1] : null;
       setOpenSlug(slug && itemsBySlug[slug] ? slug : null);
     };
     window.addEventListener("popstate", onPop);
     return () => window.removeEventListener("popstate", onPop);
-  }, [itemsBySlug]);
+  }, [itemsBySlug, basePath]);
 
   const onBoardClick = useCallback(
     (e: React.MouseEvent) => {
@@ -182,7 +186,7 @@ export function MenuBoard({
             <ul className={listClassName}>
               {results.map((item) => (
                 <li key={item.id}>
-                  <Item item={item} money={money} />
+                  <Item item={item} money={money} basePath={basePath} />
                 </li>
               ))}
             </ul>

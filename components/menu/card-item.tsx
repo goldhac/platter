@@ -9,14 +9,22 @@ import { cn } from "@/lib/utils";
  * falls back to a mark (the operator is nudged to add photos). Text sits on the CARD, so it
  * uses `text-on-surface` — a different token than the list layouts, which the contract handles.
  */
-export function CardItem({ item, money }: { item: MenuItem; money: MoneyOpts }) {
+export function CardItem({
+  item,
+  money,
+  basePath = "/menu",
+}: {
+  item: MenuItem;
+  money: MoneyOpts;
+  basePath?: string;
+}) {
   const soldOut = !item.is_available;
   const price =
     item.from_price != null ? formatFrom(item.from_price, money) : formatMoney(item.base_price, money);
 
   return (
     <a
-      href={`/menu/${item.category_slug}/${item.slug}`}
+      href={`${basePath}/${item.category_slug}/${item.slug}`}
       data-item-slug={item.slug}
       aria-disabled={soldOut || undefined}
       className={cn(

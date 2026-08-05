@@ -7,7 +7,7 @@ import { RuledItem } from "./ruled-item";
 import { CardItem } from "./card-item";
 import { EditorialItem } from "./editorial-item";
 
-export type ItemComponent = ComponentType<{ item: MenuItem; money: MoneyOpts }>;
+export type ItemComponent = ComponentType<{ item: MenuItem; money: MoneyOpts; basePath?: string }>;
 export type LayoutSpec = { Item: ItemComponent; listClassName: string };
 
 /**

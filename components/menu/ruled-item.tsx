@@ -8,7 +8,15 @@ import { cn } from "@/lib/utils";
  * `{item, money}` contract with ItemRow but is a SEPARATE component (not an `{image && …}`
  * conditional inside a shared row) — which is precisely why the theme system holds.
  */
-export function RuledItem({ item, money }: { item: MenuItem; money: MoneyOpts }) {
+export function RuledItem({
+  item,
+  money,
+  basePath = "/menu",
+}: {
+  item: MenuItem;
+  money: MoneyOpts;
+  basePath?: string;
+}) {
   const soldOut = !item.is_available;
   const price =
     item.from_price != null
@@ -17,7 +25,7 @@ export function RuledItem({ item, money }: { item: MenuItem; money: MoneyOpts })
 
   return (
     <a
-      href={`/menu/${item.category_slug}/${item.slug}`}
+      href={`${basePath}/${item.category_slug}/${item.slug}`}
       data-item-slug={item.slug}
       aria-disabled={soldOut || undefined}
       className={cn(

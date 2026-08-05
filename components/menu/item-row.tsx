@@ -10,7 +10,15 @@ import { SealMark } from "./seal-mark";
  * shallow-routed sheet (progressive enhancement). Sold-out rows dim, carry the
  * struck 售 seal, and are not tappable (P8).
  */
-export function ItemRow({ item, money }: { item: MenuItem; money: MoneyOpts }) {
+export function ItemRow({
+  item,
+  money,
+  basePath = "/menu",
+}: {
+  item: MenuItem;
+  money: MoneyOpts;
+  basePath?: string;
+}) {
   const soldOut = !item.is_available;
   const price =
     item.from_price != null
@@ -19,7 +27,7 @@ export function ItemRow({ item, money }: { item: MenuItem; money: MoneyOpts }) {
 
   return (
     <a
-      href={`/menu/${item.category_slug}/${item.slug}`}
+      href={`${basePath}/${item.category_slug}/${item.slug}`}
       data-item-slug={item.slug}
       aria-disabled={soldOut || undefined}
       className={cn(
