@@ -23,6 +23,16 @@
 
 ## Entries
 
+### 2026-08-04 · feature · M5 — theme customiser (core built)
+- **area:** apps/admin, lib/themes, lib/mutations
+- **what:** Built the customiser: `/admin/theme` (server page — loads the selected menu's theme + real items + the tenant plan; menu selector for Dinner/Bar List) + `components/admin/theme-customiser.tsx` (client split-screen: 4-theme picker with palette swatches, accent picker (curated + hex), scheme/layout toggles, and a **live phone preview of the venue's real items** that re-themes on every change via client `resolveTheme`). Publish/Discard via `lib/mutations/theme.ts` (`publishMenuTheme` / `saveMenuThemeDraft` → `theme_config_draft`), RLS-scoped (`requireManager` + `auth_can_manage`). `lib/themes/contrast.ts` = the WCAG **blocking 4.5:1** accent guard (shown as a live ratio; publish refused below it). Plan gating (Free = Lacquer only, rest Pro-locked). Added the Theme nav link.
+- **notes:** Build + token gate green. **Visual test needs an owner login** (admin is auth-gated; can't screenshot without the password) — but the underlying **publish → re-theme mechanism is already proven live** (data-driven theme), so the customiser is the UI over a working path. Follow-ups: full "Reset to defaults", preview toggles for the item-sheet/search states, per-theme font loading. Uncommitted → committing.
+
+### 2026-08-04 · deploy · ⭐ Validation gate LIVE on the hotel (Dinner=Lacquer ↔ Bar=Carafe)
+- **area:** infra, db
+- **what:** Redeployed the current build (M1–M4) to **Railway** — an interim deploy ahead of the locked P-Q2 Vercel cutover, so the *deployed* site runs the themed, menu-scoped build. Polled the live URL until the new build served (the `data-theme` marker appeared), then **published the 4 Bar drinks** (safe now — the live build scopes groups by menu, so bar items land only in the Bar List).
+- **notes:** **Live-verified + screenshot-confirmed** on `platter-production-946c.up.railway.app`: `/menu` = Dinner in Lacquer (red, photos, seals, 0 bar-drink leakage); `/menu?m=bar-list` = Bar in **Carafe** (near-black + gold, small-caps heads, dotted-leader wine list, no images) with the switcher `[Dinner | Bar List]`. Tapping the switcher re-themes the whole page. **The "do themes sell?" gate is now tangible on the real hotel.** Committed through slice 2 (`54584f1`); this deploy + publish added no code (Railway deploy + a prod data update). Follow-up: import the full scraped bar list (M5/M6); the Vercel cutover remains M7.
+
 ### 2026-08-04 · feature · M4 (slice 2) — public menu switcher + Bar List; ⭐ validation-gate mechanism proven
 - **area:** apps/public, components/menu, db
 - **what:** Built `components/menu/menu-switcher.tsx` (segmented control over the venue's live menus; hidden when ≤1; `?m=` selects the menu → re-fetch → re-theme). Wired into the page (reads `?m=`, passes to `getMenu`, renders the switcher). Created on **prod**: renamed the default menu "Dinner", added a **Bar List** menu (live, `theme_id=carafe`) + a Bar group + Cocktails & Wine category + 4 **draft** drink items.

@@ -45,10 +45,11 @@
 - [x] `ruled-list` renders with **no `{image && …}` hacks** — `RuledItem` is a SEPARATE component (not a conditional in a shared row); `components/menu/layouts.ts` (`LAYOUTS` + `layoutItem()`) selects it; layout-driven in both the server grouped view + client `MenuBoard` filtered view
 - [x] **Verified at runtime, same data → two themes:** `/menu` = list-dense/red/thumbs/0-dots; `/menu?theme=carafe` = ruled-list/gold/near-black/**20 dotted-leaders, no images**; both keep 金餐厅 + 20 ₦. Lacquer unchanged. `?theme=` preview added (also powers M5). *(Follow-up: the shared item-sheet could honor `images:'none'` too.)*
 
-## ⭐ Validation gate — mechanism PROVEN (Dinner=Lacquer ↔ Bar=Carafe switcher works)
-- [x] Jīn Cāntīng now has a **Dinner** menu (Lacquer) + a **Bar List** menu (Carafe) in prod — default renamed "Dinner"; Bar List = live/carafe with 4 **draft** drink items
-- [x] **Public menu switcher** (`components/menu/menu-switcher.tsx`) — segmented control, hidden with 1 menu; `?m=` selects the menu. **Verified:** `/menu`=Dinner/Lacquer/red, `/menu?m=bar-list`=Bar/Carafe/gold — the whole page re-themes on switch. Deployed old build unaffected (draft items → **0 leaked**).
-- [ ] Publish the Bar drinks + import the full scraped bar list — **needs the new build deployed first** (else the old build mixes published Bar items into Dinner)
+## ⭐ Validation gate — LIVE on the hotel (Dinner=Lacquer ↔ Bar=Carafe) ✅
+- [x] Jīn Cāntīng has a **Dinner** menu (Lacquer) + a **Bar List** menu (Carafe) in prod — default renamed "Dinner"; Bar List = live/carafe
+- [x] **Public menu switcher** (`components/menu/menu-switcher.tsx`) — hidden with 1 menu; `?m=` selects the menu → re-theme
+- [x] **Deployed the new build to Railway** (interim, before the P-Q2 Vercel cutover) + **published the 4 Bar drinks**. **LIVE-verified** on `platter-production-946c.up.railway.app`: `/menu`=Dinner/Lacquer/red (0 bar leak), `/menu?m=bar-list`=Bar/**Carafe**/gold/ruled-list with the 4 drinks as a dotted-leader wine list. Screenshot-confirmed.
+- [ ] *(follow-up)* import the full scraped bar list (58+ real drinks) → M5/M6 import
 - [ ] **⛔ Decision point:** does "themes sell"? → then commit to customiser/import/billing
 
 ## M3b — Counter + Palm  ✅ *all 4 launch themes shipped (built early — cheap, and completes the gallery)*
@@ -64,11 +65,11 @@
 - [ ] Menus list (card grid) + **new-menu wizard** (blank / **duplicate deep-copy** / import)
 - [ ] Rescope the v1 menu editor under a menu; add "move/duplicate to another menu" in bulk actions; per-menu publish state
 
-## M5 — Theme gallery + customiser
-- [ ] Split-screen customiser; **live phone preview of the tenant's real data** (toggles menu/item/search)
-- [ ] Accent picker (curated 8 + hex) with a **blocking** 4.5:1 contrast check
-- [ ] Draft/publish (`theme_config_draft`), "Reset to defaults"
-- [ ] Plan gating (Free sees locked themes as preview + upgrade CTA)
+## M5 — Theme gallery + customiser  ✅ *core built (`/admin/theme`)*
+- [x] Split-screen customiser (`components/admin/theme-customiser.tsx`) + `/admin/theme` page — **live phone preview of the venue's REAL items**, re-themes as you change controls; 4-theme picker + a menu selector (theme Dinner or Bar List)
+- [x] Accent picker (curated swatches + hex) with a **blocking 4.5:1 contrast check** (`lib/themes/contrast.ts`) — shows the ratio, refuses to publish an unreadable accent
+- [x] Scheme + layout toggles (only the theme's declared options); **Publish** (`publishMenuTheme`) / **Discard**; draft save (`saveMenuThemeDraft` → `theme_config_draft`); plan gating (Free = Lacquer, others **Pro**-locked)
+- [ ] *(follow-up)* full "Reset to defaults", preview toggles (item-sheet/search states); **visual test needs an owner login** (build-verified only so far — the underlying publish→re-theme mechanism is already proven live)
 
 ## M6 — Onboarding + import
 - [ ] Signup + the 6-step wizard (account → business → get-menu-in → review → theme → claim URL)
