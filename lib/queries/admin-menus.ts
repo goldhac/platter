@@ -15,14 +15,18 @@ export type AdminMenu = {
  * The venue's menus for the manager (all statuses), with a live item count each.
  * RLS scopes reads to the caller's tenant; we also filter by the venue.
  */
-export async function getAdminMenus(): Promise<{ restaurantName: string; menus: AdminMenu[] } | null> {
+export async function getAdminMenus(): Promise<{
+  restaurantName: string;
+  restaurantSlug: string;
+  menus: AdminMenu[];
+} | null> {
   const staff = await getCurrentStaff();
   if (!staff) return null;
 
   const supabase = await createClient();
   const { data: r } = await supabase
     .from("restaurants")
-    .select("id, name")
+    .select("id, name, slug")
     .eq("tenant_id", staff.tenantId)
     .limit(1)
     .maybeSingle();
@@ -55,6 +59,7 @@ export async function getAdminMenus(): Promise<{ restaurantName: string; menus: 
 
   return {
     restaurantName: r.name,
+    restaurantSlug: r.slug,
     menus: (menus ?? []).map((m) => ({
       id: m.id,
       name: m.name,

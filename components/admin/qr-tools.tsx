@@ -11,14 +11,14 @@ function download(href: string, filename: string) {
   a.click();
 }
 
-export function QrTools({ siteUrl }: { siteUrl: string }) {
+export function QrTools({ siteUrl, venuePath }: { siteUrl: string; venuePath: string }) {
   const [table, setTable] = useState("");
   const [png, setPng] = useState("");
   const [busy, setBusy] = useState(false);
 
   const t = table.trim();
   const suffix = t ? `-t${t}` : "";
-  const url = `${siteUrl}/menu${t ? `?t=${encodeURIComponent(t)}` : ""}`;
+  const url = `${siteUrl}${venuePath}${t ? `?t=${encodeURIComponent(t)}` : ""}`;
 
   useEffect(() => {
     QRCode.toDataURL(url, {

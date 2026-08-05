@@ -33,7 +33,7 @@ export default async function DashboardPage() {
           <p className="tabular text-[0.7rem] uppercase tracking-widest text-brass">Venue</p>
           <h1 className="font-display text-2xl text-porcelain">{data.restaurantName}</h1>
         </div>
-        <Link href="/menu" target="_blank" rel="noopener" className={action}>
+        <Link href={`/v/${data.restaurantSlug}`} target="_blank" rel="noopener" className={action}>
           View live site ↗
         </Link>
       </div>
@@ -80,7 +80,12 @@ export default async function DashboardPage() {
                   <Link href={`/admin/theme?m=${m.slug}`} className={action}>
                     Theme
                   </Link>
-                  <Link href={`/menu?m=${m.slug}`} target="_blank" rel="noopener" className={action}>
+                  <Link
+                    href={`/v/${data.restaurantSlug}?m=${m.slug}`}
+                    target="_blank"
+                    rel="noopener"
+                    className={action}
+                  >
                     View
                   </Link>
                 </div>

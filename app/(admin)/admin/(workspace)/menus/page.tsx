@@ -49,7 +49,12 @@ export default async function MenusPage() {
                 <Link href={`/admin/theme?m=${m.slug}`} className={pill}>
                   Theme
                 </Link>
-                <Link href={`/menu?m=${m.slug}`} target="_blank" rel="noopener" className={pill}>
+                <Link
+                  href={`/v/${data.restaurantSlug}?m=${m.slug}`}
+                  target="_blank"
+                  rel="noopener"
+                  className={pill}
+                >
                   View
                 </Link>
               </div>
