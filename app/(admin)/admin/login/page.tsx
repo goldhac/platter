@@ -22,7 +22,7 @@ export default function LoginPage() {
       setError(error.message);
       return;
     }
-    router.push("/admin/menu");
+    router.push("/admin");
     router.refresh();
   }
 

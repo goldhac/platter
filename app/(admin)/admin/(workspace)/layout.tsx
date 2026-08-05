@@ -24,7 +24,9 @@ export default async function WorkspaceLayout({ children }: { children: React.Re
     <div className="mx-auto max-w-3xl px-5 pb-16">
       <header className="flex flex-wrap items-center justify-between gap-3 border-b border-hairline/15 py-4">
         <div className="flex items-baseline gap-3">
-          <span className="font-display text-lg text-porcelain">Platter</span>
+          <Link href="/admin" className="font-display text-lg text-porcelain outline-none hover:text-brass focus-visible:ring-2 focus-visible:ring-accent/70">
+            Platter
+          </Link>
           <span className="tabular text-[0.7rem] uppercase tracking-widest text-brass">Manager</span>
         </div>
         <div className="flex items-center gap-3">
