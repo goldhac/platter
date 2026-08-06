@@ -36,6 +36,8 @@ export async function updateSession(request: NextRequest) {
   } = await supabase.auth.getUser();
 
   const path = request.nextUrl.pathname;
+  // Invite accept is reachable in BOTH auth states (sign in there, then accept).
+  if (path === "/admin/join") return response;
   // Logged-out entry points: sign in, and self-serve sign up.
   const isPublicAdmin = path === "/admin/login" || path === "/admin/signup";
   if (path.startsWith("/admin") && !isPublicAdmin && !user) {

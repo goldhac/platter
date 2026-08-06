@@ -12,6 +12,7 @@ const NAV = [
   { href: "/admin/qr", label: "QR" },
   { href: "/admin/domains", label: "Address" },
   { href: "/admin/import", label: "Data" },
+  { href: "/admin/team", label: "Team" },
   { href: "/admin/settings", label: "Settings" },
 ];
 

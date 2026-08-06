@@ -1374,6 +1374,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      accept_invite: { Args: { p_token: string }; Returns: string }
       auth_can_manage: { Args: { tid: string }; Returns: boolean }
       auth_is_admin: { Args: { tid: string }; Returns: boolean }
       auth_role: { Args: never; Returns: string }

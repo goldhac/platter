@@ -98,7 +98,7 @@
 - [ ] Paystack (NGN) + Stripe (USD) → one normalized `subscriptions` row; idempotent, signature-verified webhooks — **needs Gold's Paystack account + keys** (Stripe doesn't onboard NG businesses, so Paystack is the NGN path)
 - [ ] 14-day Pro trial (no card); proration/credit; **dunning keeps menus live** (`§13 C1`)
 - [ ] Downgrade = read-only, never delete
-- [ ] Team: invites, roles, escalation confirm, **audit log**
+- [x] **Team: invites + roles** — `/admin/team` (member list, invite by email + role, revoke, remove; seat-gated by `lib/plans`), link-based invites (24-byte token, 14-day TTL), `/admin/join` accept flow, `accept_invite()` SECURITY DEFINER (0011, email-matched). *(Deferred: role-escalation confirm + audit log, venue-scoped invites, email delivery — link-share for now.)*
 
 ## M9 — Marketing site + discover + analytics
 - [ ] `platter.app` home (live theme-cycling hero), `/themes` gallery, `/themes/[id]`, `/pricing` (dual currency)
