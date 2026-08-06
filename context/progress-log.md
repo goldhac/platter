@@ -23,6 +23,11 @@
 
 ## Entries
 
+### 2026-08-05 · feature · M9 (slice 1) — marketing site (home · pricing · themes)
+- **area:** apps/public (marketing)
+- **what:** The platform apex now serves a real marketing site (was a bare redirect to `/menu`). `/` — a hero with a **theme-cycling phone mockup** (the "one menu, four looks" differentiator, `components/marketing/hero-cycler.tsx`), features, a theme showcase, a pricing teaser, and CTAs to `/admin/signup`. `/pricing` — Free (₦0) vs Pro comparison built from `lib/plans` (Pro price = "coming soon", checkout parked). `/themes` — the four themes rendered **in-theme** (real `resolveTheme` cssVars) with tagline + best-for. Shared `MarketingShell` (header/footer). `/` is **host-aware**: a venue subdomain/custom-domain → redirect to `/menu`; the apex → the marketing home.
+- **notes:** Token gate + build green. Extended `scripts/lint-tokens.sh` EX so the marketing files may use the fixed Platter palette (same rationale as the admin chrome) — the themed swatches inside them still use semantic tokens. **Local dev render couldn't be verified — machine resource-starved again** (concurrent CSV-fix session + MCP servers); verifying on the live URL post-deploy. **Analytics decision:** use **Google Analytics (GA4)** rather than custom event-logging (`menu_events`/`qr_scans` are unused) — Gold has GA open, will supply the Measurement ID. **Domain:** `goldhac.com` (Cloudflare, unused) — Gold has Cloudflare open; wiring it next. Deferred M9: `/discover`, `/menu-import` landing, digest email (Resend), `B3/B4/B7`, `/themes/[id]`.
+
 ### 2026-08-05 · feature · M8 — plan & billing page (checkout deliberately stubbed)
 - **area:** apps/admin, lib
 - **what:** `/admin/billing` (a dashboard quick-action) — shows the current plan (Free/Pro), live usage (menus · team seats · custom domain), and a Free-vs-Pro comparison rendered from `lib/plans` (the one source). Gives the plan-limit "upgrade to unlock" errors a home. The **"Go Pro" CTA is a deliberate stub** ("card checkout coming soon") — Gold chose to leave the actual Paystack setup for later. `lib/queries/admin-billing.ts` (getBilling), `components/admin/billing-view.tsx`.

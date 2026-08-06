@@ -16,9 +16,12 @@ report() { # $1 label, $2 matches
 #  - lib/themes + globals.css + components/theme : the theme layer defines the values
 #  - app/(admin) + components/admin : the Menu Manager is the FIXED internal UI, not a
 #    tenant-themed surface (it never re-themes) — a later pass can move it onto the contract
+#  - components/marketing + the marketing pages (/, /pricing, /themes) : Platter's OWN
+#    fixed brand chrome, not a per-tenant-themed surface (the theme swatches inside them
+#    still use semantic tokens under their own data-theme)
 #  - app/api/og : next/og renders images and cannot consume CSS variables (inline hex only);
 #    per-theme OG images are a later theme enhancement
-EX='lib/themes|app/globals\.css|components/theme/|app/\(admin\)|components/admin/|app/api/og'
+EX='lib/themes|app/globals\.css|components/theme/|app/\(admin\)|components/admin/|app/api/og|components/marketing/|app/page\.tsx|app/pricing/|app/themes/'
 
 hex=$(grep -rnE '#[0-9a-fA-F]{6}\b' app components --include='*.tsx' --include='*.ts' 2>/dev/null | grep -vE "$EX" || true)
 palette=$(grep -rnE '\b(bg|text|border|ring|divide|fill|stroke|from|to|via|outline|placeholder|accent)-([a-z]+-)?(ink|porcelain|lacquer|brass|jade|ash)(/[0-9]+)?\b' app components --include='*.tsx' 2>/dev/null | grep -vE "$EX" || true)
