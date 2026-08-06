@@ -23,6 +23,11 @@
 
 ## Entries
 
+### 2026-08-05 · feature · QR Studio (M7) — bulk table codes + print export
+- **area:** apps/admin, lib
+- **what:** Upgraded the basic QR tool into **QR Studio** (`components/admin/qr-studio.tsx`, replaces the removed `qr-tools`): pick the target (whole venue **or a specific menu** → `?m=`), generate **single or bulk table codes** (tables 1–N, capped 100), choose **durability** (error-correction High/Standard), and export **PNG · SVG · A6 table-tent PDF · A4 sheet PDF** — the sheet is a labelled grid of every table's code (the bulk-print headline). `lib/table-tent.tsx` is now venue-parameterized (was hardcoded "JIN CANTING") and **ASCII-folds** macrons for @react-pdf's Latin-only font (`Jīn Cāntīng` → `Jin Canting`, verified); added `generateQrSheetPdf`. The QR page now uses `getAdminMenus`. **Per-table scan analytics is free from GA** — codes carry `?t=`/`?m=`, so GA's top-pages report segments by table + menu (the UI says so).
+- **notes:** Build + token gate green; old `qr-tools.tsx` removed (only self-referenced). PDF gen is client-side (@react-pdf, dynamically imported → code-split off the initial bundle). Codes point at `/v/<slug>` today; the UI tells staff to regenerate on the branded subdomain once DNS lands. **Not browser-tested** (admin auth-gated + local dev resource-flaky) — Gold prints one to confirm the PDFs. Deferred `[B2]` in-theme menu print PDFs (A4/A3/tent/specials) — the QR sheet + tent cover the QR side.
+
 ### 2026-08-05 · feature · M9 (slice 2) — Google Analytics + import landing
 - **area:** apps/public, marketing
 - **what:** GA4 wired via `components/analytics/google-analytics.tsx` (next/script, `afterInteractive` — no dependency), rendered in the root layout **only when `NEXT_PUBLIC_GA_ID` is set**, so it goes live the moment Gold drops the `G-…` id into Railway env. The page path carries the venue (subdomain / `/v/<slug>`), so GA's top-pages report doubles as per-venue view counts until in-app analytics lands. Root metadata made **Platter-generic** (was flagship-specific; per-page metadata still overrides). Added `/menu-import` — a focused landing for the AI import (3-step how-it-works + CTAs).

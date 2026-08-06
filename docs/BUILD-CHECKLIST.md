@@ -90,7 +90,7 @@
 - [x] **Per-venue `/api/og`** — `?r=<slug>` renders any venue with its own name/initial/**theme colours**; `buildMenuMetadata` emits per-venue OG for all venues.
 - [ ] Custom-domain **CNAME/TXT verify** (the `domain_verifications` table exists) + a slug-change **301** via the `redirects` table (today a slug change just warns to reprint QRs) + `venue:{host}` tag caching (drop `force-dynamic`)
 - [x] **Legacy `/menu/...` stays the flagship** (printed-QR contract) — the apex `/menu` resolves to the flagship, unchanged.
-- [ ] QR Studio: venue / per-menu / **per-table (bulk 1–N)** codes, styling (error-correction H), SVG/PNG/A6-PDF/A4-sheet, **scan analytics per code**
+- [x] **QR Studio** (`components/admin/qr-studio.tsx`) — target the whole venue **or a specific menu** (`?m=`), **single or bulk table codes** (1–N, cap 100), error-correction **High/Standard**, export **PNG · SVG · A6 table-tent PDF · A4 sheet PDF** (labelled grid of every table). `lib/table-tent.tsx` venue-parameterized + ASCII-folded. **Scan analytics per code = free via GA** (codes carry `?t=`/`?m=`; GA top-pages segments by table + menu).
 - [ ] **`[B2]` print parity** — the studio becomes **"Print & QR Studio"**: in-theme A4 / A3 / table-tent / specials-card PDFs via `@react-pdf`, from the same menu data (print price can't disagree with the QR price). `FEATURE-BACKLOG.md`.
 
 ## M8 — Billing + team
