@@ -94,8 +94,8 @@
 - [ ] **`[B2]` print parity** — the studio becomes **"Print & QR Studio"**: in-theme A4 / A3 / table-tent / specials-card PDFs via `@react-pdf`, from the same menu data (print price can't disagree with the QR price). `FEATURE-BACKLOG.md`.
 
 ## M8 — Billing + team
-- [ ] `lib/plans.ts` (one module) enforced in **three** layers: zod + Postgres trigger + UI
-- [ ] Paystack (NGN) + Stripe (USD) → one normalized `subscriptions` row; idempotent, signature-verified webhooks
+- [x] **`lib/plans.ts`** (the one module: Free = 1 menu/venue · Lacquer · no custom domain · owner-only · Platter branding; Pro = unlimited · all themes · custom domain · 10 seats · no branding) enforced in **three layers**: UI (customiser reads `allowedThemes`), server mutations (`createMenu`/`commitParsedMenu` → `maxMenus`; theme publish → `canUseTheme`; `updateCustomDomain` → `canUseCustomDomain`), and the **Postgres trigger** `enforce_menu_plan` (0010, backstops menu-count + Lacquer-only). Flagship set to **Pro**. *(Pricing ₦/mo still TBD — a marketing number, not a gate.)*
+- [ ] Paystack (NGN) + Stripe (USD) → one normalized `subscriptions` row; idempotent, signature-verified webhooks — **needs Gold's Paystack account + keys** (Stripe doesn't onboard NG businesses, so Paystack is the NGN path)
 - [ ] 14-day Pro trial (no card); proration/credit; **dunning keeps menus live** (`§13 C1`)
 - [ ] Downgrade = read-only, never delete
 - [ ] Team: invites, roles, escalation confirm, **audit log**

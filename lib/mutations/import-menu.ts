@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { requireManager } from "@/lib/rbac";
 import { createClient } from "@/lib/supabase/server";
 import { extractMenu, parsedMenuSchema, type ParsedMenu } from "@/lib/ai/gemini";
+import { canAddMenu, upgradeMessage } from "@/lib/plans";
 
 const MAX_BYTES = 10 * 1024 * 1024; // 10MB — matches next.config serverActions limit
 const ACCEPTED = new Set([
@@ -87,6 +88,21 @@ export async function commitParsedMenu(input: unknown, themeId = "lacquer"): Pro
     .limit(1)
     .maybeSingle();
   if (!r) return { ok: false, error: "Venue not found" };
+
+  // Plan gate: Free is capped at one menu per venue (import creates a new one).
+  const { data: tenant } = await supabase
+    .from("tenants")
+    .select("plan")
+    .eq("id", staff.tenantId)
+    .maybeSingle();
+  const { count: menuCount } = await supabase
+    .from("menus")
+    .select("id", { count: "exact", head: true })
+    .eq("restaurant_id", r.id)
+    .is("deleted_at", null);
+  if (!canAddMenu(tenant?.plan, menuCount ?? 0)) {
+    return { ok: false, error: upgradeMessage("Importing more than one menu") };
+  }
 
   // Unique slugs within the venue (menu per-venue; groups/cats/items seeded from
   // existing rows so the import can't collide with what's already there).

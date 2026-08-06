@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { requireManager } from "@/lib/rbac";
 import { createClient } from "@/lib/supabase/server";
+import { canAddMenu, upgradeMessage } from "@/lib/plans";
 
 export type MenuResult = { ok: true; slug: string } | { ok: false; error: string };
 
@@ -32,6 +33,21 @@ export async function createMenu(name: string, themeId = "lacquer"): Promise<Men
     .limit(1)
     .maybeSingle();
   if (!r) return { ok: false, error: "Venue not found" };
+
+  // Plan gate: Free is capped at one menu per venue.
+  const { data: tenant } = await supabase
+    .from("tenants")
+    .select("plan")
+    .eq("id", staff.tenantId)
+    .maybeSingle();
+  const { count } = await supabase
+    .from("menus")
+    .select("id", { count: "exact", head: true })
+    .eq("restaurant_id", r.id)
+    .is("deleted_at", null);
+  if (!canAddMenu(tenant?.plan, count ?? 0)) {
+    return { ok: false, error: upgradeMessage("More than one menu") };
+  }
 
   // unique slug within the venue
   let slug = slugify(clean);

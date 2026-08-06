@@ -23,6 +23,11 @@
 
 ## Entries
 
+### 2026-08-05 · feature · M8 (slice 1) — plan-limit enforcement (three layers)
+- **area:** lib, db, apps/admin
+- **what:** `lib/plans.ts` — the single source of plan limits (**Free**: 1 menu/venue, Lacquer only, no custom domain, owner-only, Platter branding; **Pro**: unlimited menus, all themes, custom domain, 10 seats, no branding). Enforced in **three layers**: (1) **UI** — the customiser now reads `allowedThemes(plan)` instead of an inline rule (Pro locks/badges); (2) **server mutations** — `createMenu` + `commitParsedMenu` gate `maxMenus`, `publishMenuTheme`/`saveMenuThemeDraft` gate `canUseTheme`, `updateCustomDomain` gates `canUseCustomDomain`; (3) **Postgres trigger** `enforce_menu_plan` (migration `0010`) backstops menu-count + Lacquer-only on `menus`. Set the flagship tenant (De Geogold Hotel) to **Pro** first, since it runs 2 menus + the Carafe theme.
+- **notes:** Build + token gate green. **DB trigger verified live** on a throwaway Free tenant inside a self-cleaning `do` block: 2nd menu → blocked, Carafe → blocked, rows removed (confirmed 0 residue; flagship = pro). Keep the SQL Free limits in `0010` in sync with `lib/plans.ts`. Pricing (₦/mo) is still TBD — the limits enforce; pricing is a marketing number. **Slice 3 (checkout) needs Gold's Paystack account** — the checklist's Paystack(NGN)+Stripe(USD) plan holds; Stripe won't onboard a Nigerian business, so Paystack is the NGN path. Remaining M8: team invites (slice 2), billing/upgrade UI + Paystack webhooks (slice 3).
+
 ### 2026-08-05 · feature · M7 (slice 2) — public-address claim UI + per-venue OG
 - **area:** apps/admin, apps/public, lib
 - **what:** `/admin/domains` ("Public address" — new nav item + dashboard quick-action): shows the venue's live `/v/<slug>` URL (copy/open), lets the **owner change their subdomain/slug** (validated: format + the reserved-list from `resolve.ts` + cross-tenant uniqueness) and **set a custom domain** with the Railway + DNS steps spelled out. `lib/mutations/domains.ts` — owner-only `updateSubdomain` / `updateCustomDomain`. Made **`/api/og` venue-aware**: `?r=<slug>` renders any venue with its own name, initial mark, and **theme colours** (via `getMenu` + `resolveTheme`); `buildMenuMetadata` now emits per-venue OG for every venue (was flagship-only, hardcoded jin-canting branding).

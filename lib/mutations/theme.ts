@@ -6,6 +6,7 @@ import { createClient } from "@/lib/supabase/server";
 import type { Json, TablesUpdate } from "@/lib/supabase/database.types";
 import { accentReadable, isHex } from "@/lib/themes/contrast";
 import { getTheme, resolveTheme, type ThemeConfig } from "@/lib/themes";
+import { canUseTheme, upgradeMessage } from "@/lib/plans";
 
 export type ThemeResult = { ok: true } | { ok: false; error: string };
 
@@ -23,10 +24,28 @@ function sanitize(themeId: string, config: ThemeConfig): { themeId: string; conf
   return { themeId: m.id, config: out };
 }
 
-async function writeMenu(menuId: string, patch: TablesUpdate<"menus">): Promise<ThemeResult> {
+async function writeMenu(
+  menuId: string,
+  patch: TablesUpdate<"menus">,
+  guardThemeId?: string,
+): Promise<ThemeResult> {
   const { staff, error } = await requireManager();
   if (!staff) return { ok: false, error };
   const supabase = await createClient();
+
+  // Plan gate (server-authoritative; the UI also locks Pro themes, and the 0010
+  // trigger backstops the DB). A Free tenant can't apply a Pro theme.
+  if (guardThemeId) {
+    const { data: t } = await supabase
+      .from("tenants")
+      .select("plan")
+      .eq("id", staff.tenantId)
+      .maybeSingle();
+    if (!canUseTheme(t?.plan, guardThemeId)) {
+      return { ok: false, error: upgradeMessage(`The ${getTheme(guardThemeId).name} theme`) };
+    }
+  }
+
   const { error: uErr } = await supabase
     .from("menus")
     .update(patch)
@@ -52,7 +71,11 @@ export async function publishMenuTheme(
   if (accent && onAccent && !accentReadable(accent, onAccent)) {
     return { ok: false, error: "That accent is too low-contrast to publish — pick a darker or lighter shade." };
   }
-  return writeMenu(menuId, { theme_id: s.themeId, theme_config: s.config as Json, theme_config_draft: null });
+  return writeMenu(
+    menuId,
+    { theme_id: s.themeId, theme_config: s.config as Json, theme_config_draft: null },
+    s.themeId,
+  );
 }
 
 /** Save a draft (`theme_config_draft`) without going live. */
@@ -62,5 +85,5 @@ export async function saveMenuThemeDraft(
   config: ThemeConfig,
 ): Promise<ThemeResult> {
   const s = sanitize(themeId, config);
-  return writeMenu(menuId, { theme_config_draft: { themeId: s.themeId, ...s.config } as Json });
+  return writeMenu(menuId, { theme_config_draft: { themeId: s.themeId, ...s.config } as Json }, s.themeId);
 }

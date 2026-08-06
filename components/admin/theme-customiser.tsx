@@ -16,6 +16,7 @@ import {
   type ThemeConfig,
   type ThemeId,
 } from "@/lib/themes";
+import { allowedThemes } from "@/lib/plans";
 import { cn } from "@/lib/utils";
 
 const THEMES = listThemes();
@@ -57,7 +58,7 @@ export function ThemeCustomiser({
   const resolved = resolveTheme(themeId, config);
   const { Item, listClassName } = layoutSpec(resolved.layout);
 
-  const allowed = plan === "free" ? new Set(["lacquer"]) : new Set(THEMES.map((t) => t.id));
+  const allowed = allowedThemes(plan);
   const isLocked = (id: string) => !allowed.has(id);
 
   const curAccent = resolved.cssVars["--color-accent"];

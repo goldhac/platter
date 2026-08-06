@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { requireOwner } from "@/lib/rbac";
 import { createClient } from "@/lib/supabase/server";
 import { RESERVED_SLUGS } from "@/lib/venue/resolve";
+import { canUseCustomDomain, upgradeMessage } from "@/lib/plans";
 
 export type DomainResult = { ok: true; slug?: string } | { ok: false; error: string };
 
@@ -68,6 +69,14 @@ export async function updateCustomDomain(input: unknown): Promise<DomainResult> 
 
   const supabase = await createClient();
   if (domain) {
+    const { data: tenant } = await supabase
+      .from("tenants")
+      .select("plan")
+      .eq("id", staff.tenantId)
+      .maybeSingle();
+    if (!canUseCustomDomain(tenant?.plan)) {
+      return { ok: false, error: upgradeMessage("A custom domain") };
+    }
     const { data: taken } = await supabase
       .from("restaurants")
       .select("id, tenant_id")
