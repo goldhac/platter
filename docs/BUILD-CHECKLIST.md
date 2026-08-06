@@ -11,7 +11,45 @@
 - [x] Legacy menu scraped → `scripts/legacy-menu.csv` (258 items)
 - [x] Phase 2 PRD folded into the context system (`foundation.md §13`, build-graph, this checklist, `DESIGN-SPEC.md`)
 - [x] **P-Q1 locked:** validation-first (Lacquer + Carafe first)
-- [x] **P-Q2 locked:** migrate to Vercel (before M7)
+- [x] **P-Q2 reconsidered (2026-08-05):** stay on **Railway** for M7 domains (Vercel cutover dropped — `§13 P-Q2`)
+
+---
+
+## 📋 Outstanding — the full not-done audit  *(2026-08-05, at Gold's request)*
+
+> Every open item, including things only mentioned in passing. Grouped by who's blocked; the per-milestone lists below carry the detail.
+
+### ⛔ Blocked on Gold — external / account actions
+- [ ] **Railway CLI re-auth** — run `railway login` in your terminal (session went stale: deploy works, domain-add returns `Unauthorized`) **OR** add the domains straight in the Railway dashboard. *(You're on Hobby — custom domains ARE included; it's an auth issue, not a plan one.)*
+- [ ] **Domain DNS** — Railway: add `platter.goldhac.com` + `*.platter.goldhac.com` → Cloudflare: two **grey-cloud** CNAMEs to Railway's target → then I set `NEXT_PUBLIC_PLATFORM_DOMAIN` + `NEXT_PUBLIC_SITE_URL`.
+- [ ] **Google Analytics** — give me the `G-XXXXXXXX` id → I set `NEXT_PUBLIC_GA_ID` → analytics live (code deployed, dormant).
+- [ ] **Paystack** account + test key (`sk_test_…`) → unblocks M8 checkout.
+- [ ] **Lock the brand name** (codename "Platter") · **confirm pricing** (Free ₦0 · Pro ₦?/mo).
+
+### M8 — Billing (checkout half)
+- [ ] Paystack (NGN) [+ Stripe USD] checkout + **signature-verified webhook** → flips `tenants.plan`→`pro`, writes the `subscriptions` row.
+- [ ] 14-day Pro trial (no card) · proration/credit · **dunning keeps menus live** (`§13 C1`) · **downgrade = read-only, never delete**.
+
+### M10 — Hardening  *(not started — the pre-launch gate)*
+- [ ] **6 CI gates ×4 themes:** isolation · JS ≤120KB/theme · Lighthouse ≥90/theme · axe-clean · no-raw-color · no-unscoped-query.
+- [ ] Load test (100 tenants / 20k items) · transactional email (Resend) · rate-limits + storage quotas · re-run Supabase advisors.
+
+### Follow-ups & polish  *(buildable now, deferred by priority)*
+- [~] **CSV-orphan-categories fix** — running in a **separate session** (`importItemsCsv` makes group-less categories invisible post-rescope).
+- [ ] **Custom-domain verify** (CNAME/TXT via `domain_verifications`) · **slug-change 301s** (via `redirects`) · **`venue:{host}` tag caching** (drop `force-dynamic`).
+- [ ] **Per-tenant in-app analytics screen** (needs event-logging on the unused `menu_events`/`qr_scans`) — GA covers aggregate for now.
+- [ ] **Team**: role-escalation confirm + **audit log** · venue-scoped invites (`invites.venue_ids`) · real **email** delivery (link-share today).
+- [ ] **Onboarding wizard**: business step (currency/locale/cuisine) · theme step · claim-URL step.
+- [ ] **Import**: per-item confidence · dup flags · CSV/paste/sample-menu review variants.
+- [ ] **Editor**: "move/duplicate to another menu" bulk action · per-menu publish state.
+- [ ] **Dashboard**: real view counts · sold-out nudge · usage bar · mobile bottom tabs / desktop sidebar · breadcrumbs.
+- [ ] **Multi-venue UI**: tenant/venue switcher · venues list + detail (revisit at venue #2).
+- [ ] **Customiser**: full "Reset to defaults" · preview toggles (item-sheet/search) · per-theme font loading.
+- [ ] **Marketing**: `/discover` (curated) · `/themes/[id]` detail · weekly digest email (Resend).
+- [ ] **Housekeeping**: `restaurants`→`venues` rename · isolation as vitest/CI · move `pg_trgm` out of `public` · enable Auth leaked-password protection · import the full 58-drink bar list.
+
+### Backlog features (B1–B7 · `FEATURE-BACKLOG.md`)
+- [ ] **B1** Sold-out over WhatsApp · **B2** Print parity (in-theme menu PDFs) · **B3** no-result → "Add it?" · **B4** auto menu-engineering · **B5** Guest concierge (LLM, Gemini) · **B6** dual-currency display · **B7** one-tap social kit.
 
 ---
 
@@ -104,8 +142,7 @@
 - [x] **Marketing site** — apex `/` home (theme-cycling phone hero — the "one menu, four looks" hook), features, theme showcase, pricing teaser; `/pricing` (Free ₦0 vs Pro from `lib/plans`; Pro price "coming soon" while checkout is parked); `/themes` gallery (4 themes rendered in-theme). Shared `MarketingShell`; `/` is host-aware (venue host → /menu, apex → home). *(Deferred: `/themes/[id]` detail.)*
 - [x] Analytics via **Google Analytics (GA4)** — `components/analytics/google-analytics.tsx` (next/script, afterInteractive) in the root layout, live only when `NEXT_PUBLIC_GA_ID` is set. Page path carries the venue, so GA top-pages ≈ per-venue views. *(Chosen over custom event-logging — `menu_events`/`qr_scans` are unused. Needs Gold's `G-…` id to activate.)*
 - [x] **`/menu-import` landing** (3-step how-it-works + CTAs). *(Deferred: `/discover` curated directory — empty with one unlisted venue; digest email needs Resend.)*
-- [ ] `/menu-import` landing
-- [ ] Tenant analytics screen (views, top items, **no-result searches**, scans, category drop-off)
+- [ ] **Per-tenant in-app analytics screen** (views, top items, **no-result searches**, scans, category drop-off) — deferred; **GA now covers aggregate**
 - [ ] Weekly digest email (Resend)
 - [ ] **`[B3]` no-result search → one-tap "Add it?"** — turns the no-result report into a drafted item (venue-voice description optional, Pro). Draft only.
 - [ ] **`[B4]` auto menu-engineering** in the weekly digest — star / plowhorse / puzzle / dog from views × price (views now; + orders/margin in P3).
