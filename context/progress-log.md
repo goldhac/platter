@@ -23,6 +23,11 @@
 
 ## Entries
 
+### 2026-08-05 · feature · M9 (slice 2) — Google Analytics + import landing
+- **area:** apps/public, marketing
+- **what:** GA4 wired via `components/analytics/google-analytics.tsx` (next/script, `afterInteractive` — no dependency), rendered in the root layout **only when `NEXT_PUBLIC_GA_ID` is set**, so it goes live the moment Gold drops the `G-…` id into Railway env. The page path carries the venue (subdomain / `/v/<slug>`), so GA's top-pages report doubles as per-venue view counts until in-app analytics lands. Root metadata made **Platter-generic** (was flagship-specific; per-page metadata still overrides). Added `/menu-import` — a focused landing for the AI import (3-step how-it-works + CTAs).
+- **notes:** Lint + build green. GA loads globally incl. `/admin` (staff traffic is small + filterable in GA); per-tenant in-app analytics (needs custom event-logging on the unused `menu_events`/`qr_scans`) stays deferred. **Domain decided: `goldhac.com` is Gold's umbrella for all apps → Platter lives at `platter.goldhac.com`, venues at `<slug>.platter.goldhac.com`.** The Railway custom-domain add is blocked (CLI "Unauthorized" — custom domains are a paid Railway feature / dashboard action, not a token issue); retrying per Gold. Env (`NEXT_PUBLIC_PLATFORM_DOMAIN`/`SITE_URL`) held until DNS resolves.
+
 ### 2026-08-05 · feature · M9 (slice 1) — marketing site (home · pricing · themes)
 - **area:** apps/public (marketing)
 - **what:** The platform apex now serves a real marketing site (was a bare redirect to `/menu`). `/` — a hero with a **theme-cycling phone mockup** (the "one menu, four looks" differentiator, `components/marketing/hero-cycler.tsx`), features, a theme showcase, a pricing teaser, and CTAs to `/admin/signup`. `/pricing` — Free (₦0) vs Pro comparison built from `lib/plans` (Pro price = "coming soon", checkout parked). `/themes` — the four themes rendered **in-theme** (real `resolveTheme` cssVars) with tagline + best-for. Shared `MarketingShell` (header/footer). `/` is **host-aware**: a venue subdomain/custom-domain → redirect to `/menu`; the apex → the marketing home.

@@ -102,8 +102,8 @@
 
 ## M9 — Marketing site + discover + analytics
 - [x] **Marketing site** — apex `/` home (theme-cycling phone hero — the "one menu, four looks" hook), features, theme showcase, pricing teaser; `/pricing` (Free ₦0 vs Pro from `lib/plans`; Pro price "coming soon" while checkout is parked); `/themes` gallery (4 themes rendered in-theme). Shared `MarketingShell`; `/` is host-aware (venue host → /menu, apex → home). *(Deferred: `/themes/[id]` detail.)*
-- [ ] Analytics via **Google Analytics (GA4)** — add the tag to public menu pages (needs Gold's Measurement ID). *(Chosen over custom event-logging — `menu_events`/`qr_scans` are unused.)*
-- [ ] `/discover` — **curated-only** at launch (`§13 C7`); `/menu-import` landing
+- [x] Analytics via **Google Analytics (GA4)** — `components/analytics/google-analytics.tsx` (next/script, afterInteractive) in the root layout, live only when `NEXT_PUBLIC_GA_ID` is set. Page path carries the venue, so GA top-pages ≈ per-venue views. *(Chosen over custom event-logging — `menu_events`/`qr_scans` are unused. Needs Gold's `G-…` id to activate.)*
+- [x] **`/menu-import` landing** (3-step how-it-works + CTAs). *(Deferred: `/discover` curated directory — empty with one unlisted venue; digest email needs Resend.)*
 - [ ] `/menu-import` landing
 - [ ] Tenant analytics screen (views, top items, **no-result searches**, scans, category drop-off)
 - [ ] Weekly digest email (Resend)

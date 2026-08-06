@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Fraunces, IBM_Plex_Mono, Inter, Noto_Serif_SC } from "next/font/google";
+import { GoogleAnalytics } from "@/components/analytics/google-analytics";
 import "./globals.css";
 
 // The four faces (ui-tokens.md §3). Fraunces & Inter are variable (no weight).
@@ -23,9 +24,11 @@ const notoSerifSC = Noto_Serif_SC({
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000"),
-  title: "Jīn Cāntīng · 金餐厅",
-  description: "The menu at Jīn Cāntīng, De Geogold Hotel.",
+  title: { default: "Platter — digital menus for restaurants", template: "%s" },
+  description: "Turn your paper menu into a beautiful digital menu in minutes.",
 };
+
+const gaId = process.env.NEXT_PUBLIC_GA_ID;
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
@@ -33,7 +36,10 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
       lang="en"
       className={`${fraunces.variable} ${inter.variable} ${plexMono.variable} ${notoSerifSC.variable}`}
     >
-      <body>{children}</body>
+      <body>
+        {children}
+        {gaId ? <GoogleAnalytics gaId={gaId} /> : null}
+      </body>
     </html>
   );
 }
