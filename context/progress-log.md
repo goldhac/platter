@@ -23,6 +23,11 @@
 
 ## Entries
 
+### 2026-08-05 · feature · M8 — plan & billing page (checkout deliberately stubbed)
+- **area:** apps/admin, lib
+- **what:** `/admin/billing` (a dashboard quick-action) — shows the current plan (Free/Pro), live usage (menus · team seats · custom domain), and a Free-vs-Pro comparison rendered from `lib/plans` (the one source). Gives the plan-limit "upgrade to unlock" errors a home. The **"Go Pro" CTA is a deliberate stub** ("card checkout coming soon") — Gold chose to leave the actual Paystack setup for later. `lib/queries/admin-billing.ts` (getBilling), `components/admin/billing-view.tsx`.
+- **notes:** Token gate + `tsc` + build all green — but only after a transient hang: the machine was **resource-starved** (this session + the concurrent CSV-fix session + a stack of MCP servers), so `next build` and even `tsc --noEmit` timed out repeatedly until things went idle, then built in ~4s. Kept the billing query simple (no conditional-in-`Promise.all`) to cut type risk while local checks were unreliable. **M8 status: enforcement ✓, team ✓, plan visibility ✓ — only the real Paystack checkout + signed webhooks remain, parked pending Gold's Paystack account.**
+
 ### 2026-08-05 · feature · M8 (slice 2) — team invites (link-based, seat-gated)
 - **area:** apps/admin, db, lib
 - **what:** `/admin/team` (owner): member list + pending invites + an invite form (email + role staff/manager), revoke, and remove-member — all **seat-gated** via `canAddTeamMember` (Free = owner-only, Pro = 10 seats). Invites are **link-based** (no email infra): `inviteTeammate` writes an `invites` row (24-byte token, 14-day TTL) and returns a **shareable join link**. `/admin/join?token=` (`components/admin/join-flow.tsx`) handles both auth states — sign in/up with the invited email, then accept — through `accept_invite(token)` **SECURITY DEFINER** (migration `0011`): validates the token (unexpired, unused, email matches the caller, caller not already on another team) → writes a membership + staff row for `auth.uid()`. The Proxy now exempts `/admin/join` (reachable signed-in or out). Nav gains "Team".

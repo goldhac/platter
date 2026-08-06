@@ -107,6 +107,9 @@ export default async function DashboardPage() {
           <Link href="/admin/domains" className={action}>
             Public address
           </Link>
+          <Link href="/admin/billing" className={action}>
+            Plan &amp; billing
+          </Link>
           <Link href="/admin/import" className={action}>
             Import
           </Link>
