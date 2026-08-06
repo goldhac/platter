@@ -86,9 +86,10 @@
 - [x] **Host→venue resolution (code)** — `lib/venue/resolve.ts`: `host` → venue via custom_domain → `<slug>.<PLATFORM_DOMAIN>` subdomain → apex-falls-back-to-flagship (printed-QR back-compat). Public menu is no longer hardcoded to `jin-canting`. Shared renderer (`components/menu/menu-screen.tsx`) + metadata, `basePath`-parameterized; `basePath` threaded through MenuBoard shallow-routing + the 4 layout item hrefs. **Local-verified** (flagship unchanged, venue-correct hrefs, 404s).
 - [x] **`/v/<slug>` path route** — a working public URL for every venue **today**, before any DNS (the interim shareable link until a subdomain is claimed).
 - [ ] *(infra — Gold)* Buy `platter.menu`; add it + `*.platter.menu` (wildcard cert) as domains in the **Railway dashboard**; point DNS. Then set `NEXT_PUBLIC_PLATFORM_DOMAIN=platter.menu` + `NEXT_PUBLIC_SITE_URL` on Railway → subdomains light up with zero code change. Update Supabase Auth redirect URLs for the new hosts.
-- [ ] Subdomain **claim UI** (settings: pick `<slug>`, reserved-blocklist already in `resolve.ts`, uniqueness) + custom-domain add (CNAME verify via the existing `domain_verifications` table) + TLS
-- [ ] Per-venue **`/api/og`** (currently flagship-only images) + `venue:{host}` tag caching (drop `force-dynamic`)
-- [ ] **Legacy `/menu/...` 301s forever** (printed QR contract — the apex `/menu` already stays the flagship)
+- [x] **Claim UI** (`/admin/domains` "Public address", nav + dashboard) — shows the live `/v/<slug>` URL (copy/open), owner can **change the slug/subdomain** (format + `resolve.ts` reserved-list + cross-tenant uniqueness) and **set a custom domain** with the Railway+DNS steps. `lib/mutations/domains.ts` (owner-only).
+- [x] **Per-venue `/api/og`** — `?r=<slug>` renders any venue with its own name/initial/**theme colours**; `buildMenuMetadata` emits per-venue OG for all venues.
+- [ ] Custom-domain **CNAME/TXT verify** (the `domain_verifications` table exists) + a slug-change **301** via the `redirects` table (today a slug change just warns to reprint QRs) + `venue:{host}` tag caching (drop `force-dynamic`)
+- [x] **Legacy `/menu/...` stays the flagship** (printed-QR contract) — the apex `/menu` resolves to the flagship, unchanged.
 - [ ] QR Studio: venue / per-menu / **per-table (bulk 1–N)** codes, styling (error-correction H), SVG/PNG/A6-PDF/A4-sheet, **scan analytics per code**
 - [ ] **`[B2]` print parity** — the studio becomes **"Print & QR Studio"**: in-theme A4 / A3 / table-tent / specials-card PDFs via `@react-pdf`, from the same menu data (print price can't disagree with the QR price). `FEATURE-BACKLOG.md`.
 

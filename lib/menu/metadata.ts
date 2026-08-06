@@ -1,15 +1,14 @@
 import type { Metadata } from "next";
 import { formatMoney, type MoneyOpts } from "@/lib/format/currency";
 import { getMenu } from "@/lib/queries/menu";
-import { FLAGSHIP_SLUG } from "@/lib/venue/resolve";
 
 const SITE = process.env.NEXT_PUBLIC_SITE_URL ?? "";
 
 /**
  * SEO/social metadata for a venue's menu (or a deep-linked item). `basePath` is
  * where this venue lives publicly ("/menu" on the apex/host, "/v/<slug>" on the
- * path route) so canonicals point at the right URL. OG images render the flagship
- * today, so we only attach them for the flagship until /api/og is venue-aware.
+ * path route) so canonicals point at the right URL. OG images render the venue's
+ * own name + theme via `/api/og?r=<slug>`.
  */
 export async function buildMenuMetadata(
   restaurantSlug: string,
@@ -19,7 +18,7 @@ export async function buildMenuMetadata(
   const menu = await getMenu(restaurantSlug);
   const r = menu.restaurant;
   const money: MoneyOpts = { currency: r.currency, locale: r.locale };
-  const isFlagship = restaurantSlug === FLAGSHIP_SLUG;
+  const ogBase = `/api/og?r=${encodeURIComponent(restaurantSlug)}`;
 
   const itemSlug = itemPath && itemPath.length >= 2 ? itemPath[1] : null;
   const item = itemSlug ? menu.itemsBySlug[itemSlug] : null;
@@ -31,7 +30,7 @@ export async function buildMenuMetadata(
         : formatMoney(item.base_price, money);
     const title = `${item.name} · ${r.name}`;
     const description = item.description ?? `${item.name} — ${price} at ${r.name}.`;
-    const ogUrl = `/api/og?item=${encodeURIComponent(item.slug)}`;
+    const ogUrl = `${ogBase}&item=${encodeURIComponent(item.slug)}`;
     return {
       title,
       description,
@@ -40,11 +39,9 @@ export async function buildMenuMetadata(
         title,
         description,
         type: "website",
-        ...(isFlagship ? { images: [{ url: ogUrl, width: 1200, height: 630 }] } : {}),
+        images: [{ url: ogUrl, width: 1200, height: 630 }],
       },
-      ...(isFlagship
-        ? { twitter: { card: "summary_large_image", title, description, images: [ogUrl] } }
-        : {}),
+      twitter: { card: "summary_large_image", title, description, images: [ogUrl] },
     };
   }
 
@@ -58,7 +55,7 @@ export async function buildMenuMetadata(
       title,
       description,
       type: "website",
-      ...(isFlagship ? { images: [{ url: "/api/og", width: 1200, height: 630 }] } : {}),
+      images: [{ url: ogBase, width: 1200, height: 630 }],
     },
   };
 }

@@ -104,6 +104,9 @@ export default async function DashboardPage() {
           <Link href="/admin/qr" className={action}>
             QR codes
           </Link>
+          <Link href="/admin/domains" className={action}>
+            Public address
+          </Link>
           <Link href="/admin/import" className={action}>
             Import
           </Link>

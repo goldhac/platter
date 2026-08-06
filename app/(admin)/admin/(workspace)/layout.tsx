@@ -10,6 +10,7 @@ const NAV = [
   { href: "/admin/modifiers", label: "Add-ons" },
   { href: "/admin/theme", label: "Theme" },
   { href: "/admin/qr", label: "QR" },
+  { href: "/admin/domains", label: "Address" },
   { href: "/admin/import", label: "Data" },
   { href: "/admin/settings", label: "Settings" },
 ];
