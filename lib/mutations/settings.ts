@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { requireOwner } from "@/lib/rbac";
 import { createClient } from "@/lib/supabase/server";
+import { getActiveVenueId } from "@/lib/venue/active";
 
 export type SettingsResult = { ok: true } | { ok: false; error: string };
 
@@ -17,6 +18,8 @@ export type SettingsInput = {
   ordering_enabled: boolean;
   sold_out_reset_time: string;
   accent: string;
+  secondaryCode?: string;
+  secondaryRate?: number | null;
   hours: { weekday: number; opens: string; closes: string; is_closed: boolean }[];
 };
 
@@ -33,12 +36,20 @@ export async function saveSettings(input: SettingsInput): Promise<SettingsResult
   const { data: r } = await supabase
     .from("restaurants")
     .select("id, theme")
-    .eq("tenant_id", staff.tenantId)
-    .limit(1)
+    .eq("id", (await getActiveVenueId(staff.tenantId)) ?? "")
     .maybeSingle();
   if (!r) return { ok: false, error: "Restaurant not found" };
 
-  const theme = { ...((r.theme ?? {}) as Record<string, unknown>), accent: input.accent };
+  const secondaryCode = (input.secondaryCode ?? "").trim().toUpperCase();
+  const secondaryCurrency =
+    secondaryCode.length === 3 && (input.secondaryRate ?? 0) > 0
+      ? { code: secondaryCode, rate: input.secondaryRate }
+      : undefined; // omitted from the jsonb → dual-currency off
+  const theme = {
+    ...((r.theme ?? {}) as Record<string, unknown>),
+    accent: input.accent,
+    secondaryCurrency,
+  };
   const { error: rErr } = await supabase
     .from("restaurants")
     .update({

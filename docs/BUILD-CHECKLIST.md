@@ -12,6 +12,7 @@
 - [x] Phase 2 PRD folded into the context system (`foundation.md §13`, build-graph, this checklist, `DESIGN-SPEC.md`)
 - [x] **P-Q1 locked:** validation-first (Lacquer + Carafe first)
 - [x] **P-Q2 reconsidered (2026-08-05):** stay on **Railway** for M7 domains (Vercel cutover dropped — `§13 P-Q2`)
+- [x] **Flagship real data LIVE (2026-08-06):** all 258 scraped items imported → Dinner 175 (14 cats) + Bar 83 (5 cats); placeholder seed soft-deleted. Rendering at `/v/jin-canting`.
 
 ---
 
@@ -20,6 +21,7 @@
 > Every open item, including things only mentioned in passing. Grouped by who's blocked; the per-milestone lists below carry the detail.
 
 ### ⛔ Blocked on Gold — external / account actions
+- [ ] **Flagship drink prices** — 26 Wine & Spirits + several Drinks scraped as **`₦1`** (source had no price) and now show "₦1" on the live bar menu. Enter real prices in `/admin` (Bar List → Wine & Spirits / Drinks), or I can hide them (set `draft`) until priced — your call.
 - [ ] **Railway CLI re-auth** — run `railway login` in your terminal (session went stale: deploy works, domain-add returns `Unauthorized`) **OR** add the domains straight in the Railway dashboard. *(You're on Hobby — custom domains ARE included; it's an auth issue, not a plan one.)*
 - [ ] **Domain DNS** — Railway: add `platter.goldhac.com` + `*.platter.goldhac.com` → Cloudflare: two **grey-cloud** CNAMEs to Railway's target → then I set `NEXT_PUBLIC_PLATFORM_DOMAIN` + `NEXT_PUBLIC_SITE_URL`.
 - [ ] **Google Analytics** — give me the `G-XXXXXXXX` id → I set `NEXT_PUBLIC_GA_ID` → analytics live (code deployed, dormant).
@@ -30,23 +32,28 @@
 - [ ] Paystack (NGN) [+ Stripe USD] checkout + **signature-verified webhook** → flips `tenants.plan`→`pro`, writes the `subscriptions` row.
 - [ ] 14-day Pro trial (no card) · proration/credit · **dunning keeps menus live** (`§13 C1`) · **downgrade = read-only, never delete**.
 
-### M10 — Hardening  *(not started — the pre-launch gate)*
-- [ ] **6 CI gates ×4 themes:** isolation · JS ≤120KB/theme · Lighthouse ≥90/theme · axe-clean · no-raw-color · no-unscoped-query.
-- [ ] Load test (100 tenants / 20k items) · transactional email (Resend) · rate-limits + storage quotas · re-run Supabase advisors.
+### M10 — Hardening  *(started 2026-08-06 — the pre-launch gate)*
+- [x] **Re-ran Supabase advisors + hardening migration `0012`** — locked `enforce_menu_plan` trigger fn (was anon/authenticated RPC-callable) + indexed `categories(group_id)`. Remaining advisor WARNs triaged as expected/deferred (see progress log).
+- [x] **6 CI gates wired as npm scripts:** `lint:tokens` (no-raw-color ✓) · `lint:queries` (no-unscoped-query ✓, negative-tested) · `measure-bundle` (JS ≤215KB ✓) · `test:isolation` (P0; CI-ready, run on the dev-DB tunnel) · `gate:a11y` (axe) · `gate:lighthouse` (≥90). Fast static trio = `npm run gates`. **Still to *run* once + record:** `test:isolation` (tunnel), `gate:lighthouse`/`gate:a11y` (Chrome). a11y probe already found+fixed the menu's missing `<main>` landmark.
+- [x] **JS budget re-baselined (2026-08-06): 120KB → 215KB** (Gold's call). The Next16/React19 framework floor is ~174KB gzipped; app code is lean (menu 204KB). Updated `foundation.md §7 #6`, CLAUDE.md guardrail #4, `measure-bundle.sh`.
+- [ ] Load test (100 tenants / 20k items) · transactional email (Resend) · rate-limits + storage quotas.
+- [ ] **Repo drift:** write local files for migrations `0010`/`0011` (applied via MCP, in DB history but not in `supabase/migrations/`) so the repo rebuilds from scratch.
+- [ ] **Deferred perf** (low-impact now): `memberships.auth_read_members` initplan `(select auth.*)` · `multiple_permissive_policies` RLS refactor · `pg_trgm` out of `public`.
 
 ### Follow-ups & polish  *(buildable now, deferred by priority)*
 - [~] **CSV-orphan-categories fix** — running in a **separate session** (`importItemsCsv` makes group-less categories invisible post-rescope).
 - [ ] **Custom-domain verify** (CNAME/TXT via `domain_verifications`) · **slug-change 301s** (via `redirects`) · **`venue:{host}` tag caching** (drop `force-dynamic`).
-- [ ] **Per-tenant in-app analytics screen** (needs event-logging on the unused `menu_events`/`qr_scans`) — GA covers aggregate for now.
+- [ ] **Popularity feature (Gold's call 2026-08-07 — "Track + Popular section"):** log item taps/views → an in-app analytics screen with per-item rankings → an auto-populating **"Most popular" section** at the top of the public menu (dynamic, but no full category reshuffle). Foundation: wire event-logging on the unused `menu_events`/`qr_scans` tables (nothing writes to them today). Gently folds in backlog **B4** (menu-engineering); weight by margin later. GA still covers aggregate.
 - [ ] **Team**: role-escalation confirm + **audit log** · venue-scoped invites (`invites.venue_ids`) · real **email** delivery (link-share today).
 - [ ] **Onboarding wizard**: business step (currency/locale/cuisine) · theme step · claim-URL step.
 - [ ] **Import**: per-item confidence · dup flags · CSV/paste/sample-menu review variants.
 - [ ] **Editor**: "move/duplicate to another menu" bulk action · per-menu publish state.
+- [ ] **⭐ AI image generation in the item editor (Gold's ask, 2026-08-07)** — a **"Generate" button** on the new/edit-item form that creates the dish photo from its name + description on the fly (seedream-v4 via MuAPI, the locked dark fine-dining style), auto-resizes (~100KB) + uploads to the `menu-images` bucket, and sets `image_url` — no manual upload. Same pipeline as the 258-item bulk backfill (`scratchpad/` generators). Later: a "regenerate" button + a style-preset picker + a spend guard (generations cost ~$0.04 each).
 - [ ] **Dashboard**: real view counts · sold-out nudge · usage bar · mobile bottom tabs / desktop sidebar · breadcrumbs.
 - [ ] **Multi-venue UI**: tenant/venue switcher · venues list + detail (revisit at venue #2).
 - [ ] **Customiser**: full "Reset to defaults" · preview toggles (item-sheet/search) · per-theme font loading.
 - [ ] **Marketing**: `/discover` (curated) · `/themes/[id]` detail · weekly digest email (Resend).
-- [ ] **Housekeeping**: `restaurants`→`venues` rename · isolation as vitest/CI · move `pg_trgm` out of `public` · enable Auth leaked-password protection · import the full 58-drink bar list.
+- [ ] **Housekeeping**: `restaurants`→`venues` rename · isolation as vitest/CI · move `pg_trgm` out of `public` · enable Auth leaked-password protection. *(Full bar list imported — 83 items ✓.)*
 
 ### Backlog features (B1–B7 · `FEATURE-BACKLOG.md`)
 - [ ] **B1** Sold-out over WhatsApp · **B2** Print parity (in-theme menu PDFs) · **B3** no-result → "Add it?" · **B4** auto menu-engineering · **B5** Guest concierge (LLM, Gemini) · **B6** dual-currency display · **B7** one-tap social kit.
@@ -149,7 +156,7 @@
 - [ ] **`[B7]` one-tap social kit** — export any dish as a story / post image in the venue's theme (extends `next/og`).
 
 ## M10 — Hardening  ⛔ *all gates green before ship*
-- [ ] **6 CI gates green across all 4 themes:** isolation · JS ≤120KB/theme · Lighthouse ≥90/theme · axe-clean · no-raw-color lint · no-unscoped-query lint
+- [ ] **6 CI gates green across all 4 themes:** isolation · JS ≤215KB/theme · Lighthouse ≥90/theme · axe-clean · no-raw-color lint · no-unscoped-query lint
 - [ ] Load-test 100 tenants / 20k items
 - [ ] Notifications (Resend transactional set) · analytics events wired · rate-limits + storage quotas
 

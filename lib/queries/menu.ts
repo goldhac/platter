@@ -1,5 +1,6 @@
 import { cache } from "react";
 import { createClient } from "@/lib/supabase/server";
+import type { SecondaryCurrency } from "@/lib/format/currency";
 import { getOpenState } from "@/lib/format/hours";
 import type { ThemeConfig } from "@/lib/themes";
 
@@ -30,6 +31,8 @@ export type MenuItem = {
   is_available: boolean;
   image_url: string | null;
   prep_time_minutes: number | null;
+  /** 'published' | 'draft'. Anon only ever sees 'published' (RLS); staff see drafts too. */
+  status: string;
   variants: MenuVariant[];
 };
 
@@ -51,6 +54,7 @@ export type MenuGroup = {
 
 export type MenuRestaurant = {
   id: string;
+  tenant_id: string;
   name: string;
   name_zh: string | null;
   slug: string;
@@ -61,6 +65,8 @@ export type MenuRestaurant = {
   whatsapp: string | null;
   address: string | null;
   ordering_enabled: boolean;
+  /** Optional dual-currency display (owner-set code + rate); null when off. */
+  secondary_currency: SecondaryCurrency | null;
 };
 
 export type OpenState = { open: boolean; label: string };
@@ -89,6 +95,8 @@ export type Menu = {
   categories: MenuCategory[];
   /** slug → item, for the shallow-routed detail sheet. */
   itemsBySlug: Record<string, MenuItem>;
+  /** Top items by diner taps (last 30d) — drives the "Most popular" shelf. May be empty. */
+  popular: MenuItem[];
 };
 
 /**
@@ -102,7 +110,7 @@ export const getMenu = cache(async (restaurantSlug: string, menuSlug?: string): 
   const { data: restaurant, error: rErr } = await supabase
     .from("restaurants")
     .select(
-      "id, name, name_zh, slug, currency, locale, timezone, phone, whatsapp, address, ordering_enabled",
+      "id, tenant_id, name, name_zh, slug, currency, locale, timezone, phone, whatsapp, address, ordering_enabled, theme",
     )
     .eq("slug", restaurantSlug)
     .single();
@@ -118,6 +126,7 @@ export const getMenu = cache(async (restaurantSlug: string, menuSlug?: string): 
     { data: groupRows, error: gErr },
     { data: catRows, error: cErr },
     { data: hourRows },
+    { data: popRows },
   ] = await Promise.all([
     supabase
       .from("menus")
@@ -134,7 +143,7 @@ export const getMenu = cache(async (restaurantSlug: string, menuSlug?: string): 
     supabase
       .from("categories")
       .select(
-        "id, name, name_zh, slug, sort_order, group_id, items(id, name, name_zh, description, slug, base_price, spice_level, dietary_tags, allergens, is_featured, is_available, image_url, prep_time_minutes, sort_order, item_variants(id, label, label_zh, price, sort_order, is_available))",
+        "id, name, name_zh, slug, sort_order, group_id, items(id, name, name_zh, description, slug, base_price, spice_level, dietary_tags, allergens, is_featured, is_available, image_url, prep_time_minutes, status, sort_order, item_variants(id, label, label_zh, price, sort_order, is_available))",
       )
       .eq("restaurant_id", restaurant.id)
       .order("sort_order"),
@@ -142,6 +151,9 @@ export const getMenu = cache(async (restaurantSlug: string, menuSlug?: string): 
       .from("opening_hours")
       .select("weekday, opens, closes, is_closed")
       .eq("restaurant_id", restaurant.id),
+    // Aggregate popularity (item id + tap count) via SECURITY DEFINER RPC — anon can't
+    // read raw menu_events. Ordered by count desc; we map ids → live items below.
+    supabase.rpc("popular_items", { p_restaurant_id: restaurant.id, p_days: 30, p_limit: 8 }),
   ]);
 
   if (mErr) throw new Error(`getMenu: menus query failed: ${mErr.message}`);
@@ -203,6 +215,7 @@ export const getMenu = cache(async (restaurantSlug: string, menuSlug?: string): 
           is_available: it.is_available,
           image_url: it.image_url,
           prep_time_minutes: it.prep_time_minutes,
+          status: it.status,
           variants,
         };
         itemsBySlug[item.slug] = item;
@@ -235,8 +248,26 @@ export const getMenu = cache(async (restaurantSlug: string, menuSlug?: string): 
     is_default: m.is_default,
   }));
 
+  // "Most popular" shelf: map the aggregate item ids back onto items that are live in
+  // THIS menu + available, preserving the popularity order. Items from another menu on
+  // the venue (or now sold-out / unpublished) simply drop out.
+  const byId: Record<string, MenuItem> = {};
+  for (const c of categories) for (const it of c.items) byId[it.id] = it;
+  const popular: MenuItem[] = ((popRows ?? []) as { item_id: string; views: number }[])
+    .map((r) => byId[r.item_id])
+    .filter((it): it is MenuItem => !!it && it.is_available)
+    .slice(0, 6);
+
+  // Dual-currency config lives in the venue's settings bag (restaurants.theme jsonb).
+  const themeBag = (restaurant.theme ?? {}) as { secondaryCurrency?: { code?: string; rate?: number } };
+  const sc = themeBag.secondaryCurrency;
+  const secondary_currency: SecondaryCurrency | null =
+    sc && sc.code && typeof sc.rate === "number" && sc.rate > 0
+      ? { code: sc.code, rate: sc.rate }
+      : null;
+
   return {
-    restaurant,
+    restaurant: { ...restaurant, secondary_currency },
     openState,
     themeId: activeMenu?.theme_id ?? "lacquer",
     themeConfig: (activeMenu?.theme_config ?? {}) as ThemeConfig,
@@ -245,5 +276,6 @@ export const getMenu = cache(async (restaurantSlug: string, menuSlug?: string): 
     groups,
     categories: categories.filter((c) => c.items.length > 0),
     itemsBySlug,
+    popular,
   };
 });

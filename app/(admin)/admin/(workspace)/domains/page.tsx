@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { DomainsForm } from "@/components/admin/domains-form";
 import { getCurrentStaff } from "@/lib/rbac";
 import { createClient } from "@/lib/supabase/server";
+import { getActiveVenueId } from "@/lib/venue/active";
 
 export const dynamic = "force-dynamic";
 
@@ -13,8 +14,7 @@ export default async function DomainsPage() {
   const { data: r } = await supabase
     .from("restaurants")
     .select("slug, custom_domain")
-    .eq("tenant_id", staff.tenantId)
-    .limit(1)
+    .eq("id", (await getActiveVenueId(staff.tenantId)) ?? "")
     .maybeSingle();
   if (!r) redirect("/admin/login");
 

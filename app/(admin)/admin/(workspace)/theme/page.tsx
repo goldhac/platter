@@ -2,12 +2,11 @@ import { redirect } from "next/navigation";
 import { getMenu } from "@/lib/queries/menu";
 import { getCurrentStaff } from "@/lib/rbac";
 import { createClient } from "@/lib/supabase/server";
+import { getActiveVenueId, getTenantVenues } from "@/lib/venue/active";
 import { ThemeCustomiser } from "@/components/admin/theme-customiser";
 import { cn } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
-
-const RESTAURANT_SLUG = "jin-canting";
 
 export default async function ThemePage({
   searchParams,
@@ -17,8 +16,15 @@ export default async function ThemePage({
   const staff = await getCurrentStaff();
   if (!staff) redirect("/admin/login");
 
+  // Theme the ACTIVE venue's menu (not a hardcoded slug) so multi-venue tenants tune the
+  // right one — and any tenant themes their own venue, not the flagship.
+  const venues = await getTenantVenues(staff.tenantId);
+  const activeId = await getActiveVenueId(staff.tenantId);
+  const activeVenue = venues.find((v) => v.id === activeId) ?? venues[0];
+  if (!activeVenue) redirect("/admin");
+
   const { m } = await searchParams;
-  const menu = await getMenu(RESTAURANT_SLUG, m);
+  const menu = await getMenu(activeVenue.slug, m);
   const active = menu.menus.find((mm) => mm.slug === menu.activeMenuSlug) ?? menu.menus[0] ?? null;
 
   const supabase = await createClient();

@@ -1,11 +1,14 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { SignOutButton } from "@/components/admin/sign-out-button";
+import { VenueSwitcher } from "@/components/admin/venue-switcher";
 import { getCurrentStaff } from "@/lib/rbac";
+import { getActiveVenueId, getTenantVenues } from "@/lib/venue/active";
 
 const NAV = [
   { href: "/admin/menus", label: "Menus" },
   { href: "/admin/menu", label: "Editor" },
+  { href: "/admin/analytics", label: "Insights" },
   { href: "/admin/categories", label: "Categories" },
   { href: "/admin/modifiers", label: "Add-ons" },
   { href: "/admin/theme", label: "Theme" },
@@ -22,6 +25,9 @@ export default async function WorkspaceLayout({ children }: { children: React.Re
   const staff = await getCurrentStaff();
   if (!staff) redirect("/admin/login");
 
+  const venues = await getTenantVenues(staff.tenantId);
+  const activeVenueId = await getActiveVenueId(staff.tenantId);
+
   return (
     <div className="mx-auto max-w-3xl px-5 pb-16">
       <header className="flex flex-wrap items-center justify-between gap-3 border-b border-hairline/15 py-4">
@@ -32,6 +38,7 @@ export default async function WorkspaceLayout({ children }: { children: React.Re
           <span className="tabular text-[0.7rem] uppercase tracking-widest text-brass">Manager</span>
         </div>
         <div className="flex items-center gap-3">
+          {activeVenueId && <VenueSwitcher venues={venues} activeId={activeVenueId} />}
           <span className="text-xs text-muted">
             {staff.fullName ?? staff.email ?? "Signed in"} · {staff.role}
           </span>

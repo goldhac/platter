@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { requireManager } from "@/lib/rbac";
 import { createClient } from "@/lib/supabase/server";
+import { getActiveVenueId } from "@/lib/venue/active";
 import { extractMenu, parsedMenuSchema, type ParsedMenu } from "@/lib/ai/gemini";
 import { canAddMenu, upgradeMessage } from "@/lib/plans";
 
@@ -84,8 +85,7 @@ export async function commitParsedMenu(input: unknown, themeId = "lacquer"): Pro
   const { data: r } = await supabase
     .from("restaurants")
     .select("id")
-    .eq("tenant_id", staff.tenantId)
-    .limit(1)
+    .eq("id", (await getActiveVenueId(staff.tenantId)) ?? "")
     .maybeSingle();
   if (!r) return { ok: false, error: "Venue not found" };
 

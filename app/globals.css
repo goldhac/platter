@@ -6,7 +6,8 @@
   palette utilities; never raw hex. Dark-first (v1 is dark-only, ui-tokens.md §6).
 */
 @theme {
-  /* raw palette — "lacquer, brass, porcelain" */
+  /* legacy raw palette — the admin still uses ink/porcelain/brass utilities directly; kept
+     until the admin redesign so those surfaces don't break mid-transition. */
   --color-ink: #14110f;
   --color-porcelain: #f7f4ee;
   --color-lacquer: #8e1d1d;
@@ -14,29 +15,65 @@
   --color-jade: #3f6b58;
   --color-ash: #8a827a;
 
-  /* semantic contract (ui-tokens.md §2) — the ONLY colors components reference.
-     Defaults below = Lacquer; per-menu values are injected by <ThemeProvider> (M2, lib/themes). */
-  --color-bg: var(--color-ink);
-  --color-surface: var(--color-porcelain);
-  --color-text: var(--color-porcelain);
-  --color-text-on-surface: var(--color-ink);
-  --color-text-secondary: var(--color-ash);
-  --color-accent: var(--color-lacquer); /* tenant-settable within a curated set (M5) */
-  --color-on-accent: var(--color-porcelain);
-  --color-hairline: var(--color-brass);
-  --color-positive: var(--color-jade);
-  --color-muted: var(--color-ash); /* @deprecated alias (admin still uses it) — menu uses --color-text-secondary */
+  /* ── Platter v2 semantic contract (redesign 2026-08, docs/REDESIGN-BRIEF + handoff). ──
+     Dark-first oxblood/gilt/bone. The diner menu overrides these per-theme via <ThemeProvider>
+     (lib/themes), so these defaults drive the marketing + admin surfaces. Every v1 role name is
+     kept (values changed); 7 roles are new (surface-raised/sunken, text-tertiary,
+     hairline-strong, danger, caution, accent-text) + the accent trio. */
+  --color-bg: #0a0807;
+  --color-surface: #151110;
+  --color-surface-raised: #1d1917;
+  --color-surface-sunken: #0f0c0b;
+  --color-text: #f6f2ea;
+  --color-text-on-surface: #f6f2ea; /* surfaces are dark now → light text */
+  --color-text-secondary: #948b81;
+  --color-text-tertiary: #837a71;
+  --color-accent: #8d2020;
+  --color-accent-hover: #a82f2c;
+  --color-accent-press: #6b1518;
+  --color-accent-soft: rgb(141 32 32 / 0.16);
+  --color-accent-text: #e0655a; /* lacquer AS TEXT on a dark surface (AA) */
+  --color-on-accent: #f6f2ea;
+  --color-hairline: rgb(246 242 234 / 0.1); /* was brass; now a 10% bone structural line */
+  --color-hairline-strong: #c9a667; /* brass, ceremonial: eyebrows, rules, section marks */
+  --color-positive: #5f9c7c;
+  --color-danger: #d9584c;
+  --color-danger-on-soft: #e0655a; /* danger AS TEXT on danger-soft */
+  --color-caution: #d9a441;
+  --color-overlay: rgb(7 5 5 / 0.72);
+  --color-muted: #948b81; /* @deprecated alias == text-secondary */
 
-  /* type — bound to the next/font CSS vars set in app/layout.tsx */
-  --font-display: var(--font-fraunces), ui-serif, Georgia, serif;
+  /* type — v2 faces (app/layout.tsx). Menu keeps Fraunces/Inter/Plex via lib/themes for now. */
+  --font-display: var(--font-bodoni), ui-serif, Georgia, serif;
+  --font-body: var(--font-public-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-martian), ui-monospace, monospace;
   --font-cjk: var(--font-noto-serif-sc), ui-serif, serif;
-  --font-body: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
-  --font-mono: var(--font-plex-mono), ui-monospace, monospace;
 
-  /* shape & elevation */
-  --radius-card: 4px;
+  /* radius */
+  --radius-xs: 3px;
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+  --radius-xl: 22px;
+  --radius-pill: 999px;
+  --radius-card: 6px; /* alias (was 4px) — plates + controls = sm */
   --radius-seal: 6px;
-  --shadow-plate: 0 1px 2px rgb(0 0 0 / 0.3);
+
+  /* elevation */
+  --shadow-e1: 0 1px 2px rgb(0 0 0 / 0.45);
+  --shadow-e2: 0 6px 18px -6px rgb(0 0 0 / 0.6);
+  --shadow-e3: 0 28px 64px -20px rgb(0 0 0 / 0.8);
+  --shadow-plate: var(--shadow-e1); /* alias */
+
+  /* motion — leaving is always faster than entering; respect prefers-reduced-motion */
+  --duration-1: 90ms;
+  --duration-2: 140ms;
+  --duration-3: 200ms;
+  --duration-4: 320ms;
+  --duration-5: 440ms;
+  --ease-standard: cubic-bezier(0.2, 0, 0, 1);
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-sheet: cubic-bezier(0.32, 0.72, 0, 1);
 }
 
 :root {
@@ -55,6 +92,65 @@ body {
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
   font-feature-settings: "tnum";
+}
+
+/* Marketing entrance + marquee animations (components/marketing/*, v2 redesign). */
+@keyframes m-up {
+  from {
+    opacity: 0;
+    transform: translateY(28px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes m-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes m-scale {
+  from {
+    opacity: 0;
+    transform: scale(1.06);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes m-slide {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .m-marquee,
+  .m-fade {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+}
+/* Marketing FAQ <details> toggle (+ closed, − open); native marker hidden. */
+.m-faq summary::-webkit-details-marker {
+  display: none;
+}
+.m-faq .m-faq-dash {
+  display: none;
+}
+.m-faq[open] .m-faq-plus {
+  display: none;
+}
+.m-faq[open] .m-faq-dash {
+  display: inline;
 }
 
 /* Horizontal rails scroll; the page body never does (ui-rules.md §1). */
@@ -94,5 +190,66 @@ body {
   }
   [data-sheet="overlay"][data-state="open"] {
     animation: sheet-fade 0.2s ease;
+  }
+}
+
+/* Admin-on-menu layer: "view as customer" preview hides every admin affordance so the
+   owner sees exactly what a diner sees (components/menu/admin/*). */
+[data-admin-preview] [data-edit-slug],
+[data-admin-preview] [data-draft-badge],
+[data-admin-preview] [data-draft-item] {
+  display: none !important;
+}
+
+/* Image skeleton — a subtle shimmer over the surface colour while a photo loads (replaces
+   the old blur placeholder). The loaded, object-cover <img> paints over it. Theme-aware. */
+.img-skeleton {
+  background-color: var(--color-surface);
+  background-image: linear-gradient(
+    100deg,
+    transparent 35%,
+    color-mix(in srgb, var(--color-hairline) 26%, transparent) 50%,
+    transparent 65%
+  );
+  background-repeat: no-repeat;
+  background-size: 200% 100%;
+  animation: img-shimmer 1.5s ease-in-out infinite;
+}
+@keyframes img-shimmer {
+  from {
+    background-position: 150% 0;
+  }
+  to {
+    background-position: -50% 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .img-skeleton {
+    animation: none;
+  }
+}
+
+/* Print menu (/v/<slug>/print): paginate cleanly onto A4 — content flows across pages,
+   but an item never splits and a category heading never orphans at a page bottom. */
+@page {
+  size: A4;
+  margin: 14mm;
+}
+@media print {
+  .no-print {
+    display: none !important;
+  }
+  .print-page {
+    padding: 0 !important;
+    max-width: none !important;
+  }
+  .print-page section {
+    break-inside: auto; /* long categories may span pages */
+  }
+  .print-page li {
+    break-inside: avoid; /* a single dish never splits across pages */
+  }
+  .print-page h2 {
+    break-after: avoid; /* a category heading stays with its first items */
   }
 }

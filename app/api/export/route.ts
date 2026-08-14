@@ -1,12 +1,17 @@
 import { CSV_COLUMNS, toCsv } from "@/lib/csv";
 import { getCurrentStaff } from "@/lib/rbac";
 import { createClient } from "@/lib/supabase/server";
+import { getActiveVenueId, getTenantVenues } from "@/lib/venue/active";
 
-// Exports the tenant's items as CSV (A11) — data ownership + backup. RLS scopes
-// the query to the caller's tenant.
+// Exports the active venue's items as CSV (A11) — data ownership + backup. RLS scopes
+// to the caller's tenant; we further scope to the venue they're currently managing.
 export async function GET() {
   const staff = await getCurrentStaff();
   if (!staff) return new Response("Unauthorized", { status: 401 });
+
+  const venues = await getTenantVenues(staff.tenantId);
+  const activeId = await getActiveVenueId(staff.tenantId);
+  const venue = venues.find((v) => v.id === activeId) ?? venues[0] ?? null;
 
   const supabase = await createClient();
   const { data, error } = await supabase
@@ -14,6 +19,7 @@ export async function GET() {
     .select(
       "name, name_zh, description, base_price, spice_level, dietary_tags, allergens, is_featured, status, categories(name)",
     )
+    .eq("restaurant_id", venue?.id ?? "")
     .is("deleted_at", null)
     .order("sort_order");
   if (error) return new Response(error.message, { status: 500 });
@@ -38,7 +44,7 @@ export async function GET() {
   return new Response(toCsv(rows, [...CSV_COLUMNS]), {
     headers: {
       "Content-Type": "text/csv; charset=utf-8",
-      "Content-Disposition": 'attachment; filename="jin-canting-menu.csv"',
+      "Content-Disposition": `attachment; filename="${venue?.slug ?? "menu"}-menu.csv"`,
     },
   });
 }

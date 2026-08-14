@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { requireManager } from "@/lib/rbac";
 import { createClient } from "@/lib/supabase/server";
+import { getActiveVenueId } from "@/lib/venue/active";
 import { canAddMenu, upgradeMessage } from "@/lib/plans";
 
 export type MenuResult = { ok: true; slug: string } | { ok: false; error: string };
@@ -29,8 +30,7 @@ export async function createMenu(name: string, themeId = "lacquer"): Promise<Men
   const { data: r } = await supabase
     .from("restaurants")
     .select("id")
-    .eq("tenant_id", staff.tenantId)
-    .limit(1)
+    .eq("id", (await getActiveVenueId(staff.tenantId)) ?? "")
     .maybeSingle();
   if (!r) return { ok: false, error: "Venue not found" };
 

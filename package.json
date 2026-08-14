@@ -11,8 +11,14 @@
     "start": "next start",
     "lint": "eslint",
     "lint:tokens": "bash scripts/lint-tokens.sh",
+    "lint:queries": "bash scripts/lint-queries.sh",
+    "measure-bundle": "bash scripts/measure-bundle.sh",
+    "gate:a11y": "bash scripts/gate-a11y.sh",
+    "gate:lighthouse": "bash scripts/gate-lighthouse.sh",
+    "test:isolation": "bash scripts/test-isolation.sh",
     "typecheck": "tsc --noEmit",
-    "test": "vitest run"
+    "test": "vitest run",
+    "gates": "npm run typecheck && npm run lint:tokens && npm run lint:queries"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",
@@ -30,6 +36,7 @@
     "react-dom": "19.2.8",
     "react-easy-crop": "^6.2.3",
     "react-hook-form": "^7.84.0",
+    "sharp": "^0.35.3",
     "sonner": "^2.0.7",
     "tailwind-merge": "^3.6.0",
     "zod": "^4.4.3"

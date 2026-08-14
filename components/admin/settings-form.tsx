@@ -33,6 +33,8 @@ export function SettingsForm({
     ordering_enabled: restaurant.ordering_enabled,
     sold_out_reset_time: restaurant.sold_out_reset_time.slice(0, 5),
     accent: restaurant.accent,
+    secondaryCode: restaurant.secondary_code,
+    secondaryRate: restaurant.secondary_rate != null ? String(restaurant.secondary_rate) : "",
   });
   const [hours, setHours] = useState<HourEdit[]>(
     initialHours.map((h) => ({
@@ -53,7 +55,11 @@ export function SettingsForm({
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
     setSaving(true);
-    const res = await saveSettings({ ...form, hours });
+    const res = await saveSettings({
+      ...form,
+      secondaryRate: form.secondaryRate.trim() ? Number(form.secondaryRate) : null,
+      hours,
+    });
     setSaving(false);
     if (!res.ok) {
       toast.error(res.error);
@@ -127,6 +133,33 @@ export function SettingsForm({
             onChange={(e) => set("sold_out_reset_time", e.target.value)}
           />
         </div>
+      </div>
+
+      <div className="rounded-card border border-hairline/20 p-3">
+        <span className={label}>Second currency on prices (optional)</span>
+        <div className="grid grid-cols-2 gap-3">
+          <input
+            className={`${field} tabular`}
+            maxLength={3}
+            placeholder="e.g. USD"
+            value={form.secondaryCode}
+            onChange={(e) => set("secondaryCode", e.target.value.toUpperCase())}
+          />
+          <input
+            className={`${field} tabular`}
+            inputMode="decimal"
+            placeholder={`rate per 1 ${form.currency || "unit"}`}
+            value={form.secondaryRate}
+            onChange={(e) => set("secondaryRate", e.target.value.replace(/[^0-9.]/g, ""))}
+          />
+        </div>
+        <p className="mt-1.5 text-[0.7rem] text-muted">
+          Shows an “≈” second price in the item view. Rate = second-currency units per 1 {form.currency || "unit"}
+          {form.secondaryCode && form.secondaryRate
+            ? ` (e.g. 1,000 ${form.currency} ≈ ${(1000 * Number(form.secondaryRate || 0)).toLocaleString(undefined, { maximumFractionDigits: 2 })} ${form.secondaryCode})`
+            : ""}
+          . Leave blank to turn off.
+        </p>
       </div>
 
       <div className="flex flex-wrap items-center gap-6">

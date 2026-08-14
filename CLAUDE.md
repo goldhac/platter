@@ -21,7 +21,7 @@ Add an entry to [`context/progress-log.md`](context/progress-log.md) **before en
 1. A tenant-owned query or write **without tenant scoping** (`security.md §1`).
 2. The **service-role key** in anything reachable from the client bundle (`security.md §3`).
 3. A price in the wrong currency, hand-formatted, or shown twice (`code-standards.md §6`).
-4. Shipping past the **perf budget** — >120KB initial JS or Lighthouse <90 (`foundation.md §7 #6`).
+4. Shipping past the **perf budget** — >215KB initial JS or Lighthouse <90 (`foundation.md §7 #6`; re-baselined from 120KB on 2026-08-06 — the Next16/React19 framework floor is ~174KB).
 5. A **hard delete** of menu data — soft-delete only (`foundation.md §7 #14`).
 
 ## Where things are

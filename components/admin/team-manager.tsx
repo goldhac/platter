@@ -39,7 +39,11 @@ export function TeamManager({ data }: { data: TeamData }) {
       setLink(url);
       setEmail("");
       navigator.clipboard?.writeText(url).catch(() => {});
-      toast.success("Invite created — link copied. Share it with your teammate.");
+      toast.success(
+        res.emailed
+          ? `Invite emailed to ${e} — link also copied.`
+          : "Invite created — link copied. Share it with your teammate.",
+      );
       router.refresh();
     });
   }

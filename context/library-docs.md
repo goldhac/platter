@@ -2,7 +2,7 @@
 
 > The stack, **as used in this project** — not general documentation (link out for that). For *why* each choice, see `foundation.md §7` (cited below); for conventions, see [`code-standards.md`](code-standards.md). When this file and `foundation.md` disagree, foundation wins.
 >
-> **The rule:** do not install any package that isn't in the Approved Dependencies table (§ bottom) without adding it here first — name, purpose, why, and gotchas — and weighing it against the 120KB initial-JS budget (`foundation.md §7 #6`).
+> **The rule:** do not install any package that isn't in the Approved Dependencies table (§ bottom) without adding it here first — name, purpose, why, and gotchas — and weighing it against the 215KB initial-JS budget (`foundation.md §7 #6`).
 
 **Status key:** ✅ locked · 🕗 TBD (decide before use) · ⬜ planned (later phase)
 

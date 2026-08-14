@@ -65,6 +65,7 @@ export function ItemForm({
   const {
     register,
     handleSubmit,
+    watch,
     formState: { errors, isSubmitting },
   } = useForm<FormValues>({
     defaultValues: {
@@ -133,7 +134,13 @@ export function ItemForm({
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
       <div>
         <span className={label}>Photo</span>
-        <ImageUpload tenantId={tenantId} value={imageUrl} onChange={setImageUrl} />
+        <ImageUpload
+          tenantId={tenantId}
+          value={imageUrl}
+          onChange={setImageUrl}
+          promptName={watch("name")}
+          promptDesc={watch("description")}
+        />
       </div>
 
       <div>

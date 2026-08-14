@@ -1,13 +1,22 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { MenuImport } from "@/components/admin/menu-import";
+import { getCurrentStaff } from "@/lib/rbac";
 import { createClient } from "@/lib/supabase/server";
+import { OnboardingWizard } from "@/components/admin/onboarding-wizard";
 
 export const dynamic = "force-dynamic";
 
-// Post-signup setup. Provisions the tenant (idempotent) for whoever just
-// authenticated — whether they got an immediate session or arrived via the
-// email-confirmation link — then leads with the AI menu import.
+const PLATFORM_HOST = (
+  process.env.NEXT_PUBLIC_PLATFORM_DOMAIN ||
+  process.env.NEXT_PUBLIC_SITE_URL ||
+  "platter.goldhac.com"
+)
+  .replace(/^https?:\/\//, "")
+  .replace(/\/$/, "");
+
+// Post-signup setup. Provisions the tenant (idempotent) for whoever just authenticated —
+// whether they got an immediate session or arrived via the email-confirmation link — then
+// runs the guided wizard (details → link → menu).
 export default async function OnboardingPage() {
   const supabase = await createClient();
   const {
@@ -16,7 +25,6 @@ export default async function OnboardingPage() {
   if (!user) redirect("/admin/login");
 
   const { error } = await supabase.rpc("provision_tenant", {});
-
   if (error) {
     return (
       <div className="mx-auto max-w-md px-5 py-16 text-center">
@@ -32,29 +40,30 @@ export default async function OnboardingPage() {
     );
   }
 
+  const staff = await getCurrentStaff();
+  const { data: rest } = staff
+    ? await supabase
+        .from("restaurants")
+        .select("name, cuisine, currency, slug")
+        .eq("tenant_id", staff.tenantId)
+        .limit(1)
+        .maybeSingle()
+    : { data: null };
+
   return (
     <div className="mx-auto max-w-xl px-5 py-12">
-      <header className="text-center">
+      <header className="mb-8 text-center">
         <span className="tabular text-[0.7rem] uppercase tracking-widest text-brass">Welcome to Platter</span>
-        <h1 className="mt-2 font-display text-3xl text-porcelain">Let&apos;s get your menu online</h1>
-        <p className="mt-2 text-sm text-muted">
-          Snap a photo or upload a PDF of your existing menu — we&apos;ll turn it into an editable
-          draft in seconds. You review everything before it goes live.
-        </p>
       </header>
-
-      <div className="mt-8">
-        <MenuImport />
-      </div>
-
-      <div className="mt-8 border-t border-hairline/15 pt-5 text-center">
-        <Link
-          href="/admin"
-          className="tabular rounded-card border border-hairline/30 px-4 py-2 text-xs uppercase tracking-wider text-muted hover:text-porcelain"
-        >
-          Skip for now — I&apos;ll add items myself
-        </Link>
-      </div>
+      <OnboardingWizard
+        initial={{
+          name: rest?.name ?? "",
+          cuisine: rest?.cuisine ?? "",
+          currency: rest?.currency ?? "NGN",
+          slug: rest?.slug ?? "",
+          platformHost: PLATFORM_HOST,
+        }}
+      />
     </div>
   );
 }

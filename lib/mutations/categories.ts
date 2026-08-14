@@ -5,6 +5,7 @@ import { requireManager, type StaffContext } from "@/lib/rbac";
 import { categoryInputSchema } from "@/lib/schemas";
 import { slugify } from "@/lib/slug";
 import { createClient } from "@/lib/supabase/server";
+import { getActiveVenueId } from "@/lib/venue/active";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@/lib/supabase/database.types";
 
@@ -24,8 +25,7 @@ async function resolveRestaurantId(
   const { data } = await supabase
     .from("restaurants")
     .select("id")
-    .eq("tenant_id", staff.tenantId)
-    .limit(1)
+    .eq("id", (await getActiveVenueId(staff.tenantId)) ?? "")
     .maybeSingle();
   return data?.id ?? null;
 }

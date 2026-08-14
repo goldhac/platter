@@ -1,8 +1,13 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getAdminMenus } from "@/lib/queries/admin-menus";
+import { getRecentActivity } from "@/lib/queries/admin-audit";
+import { PLAN_LABEL, PLANS, planOf } from "@/lib/plans";
 import { getCurrentStaff } from "@/lib/rbac";
+import { createClient } from "@/lib/supabase/server";
+import { timeAgo } from "@/lib/format/time";
 import { NewMenuButton } from "@/components/admin/new-menu-button";
+import { AddVenueButton } from "@/components/admin/venue-switcher";
 import { cn } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
@@ -26,6 +31,19 @@ export default async function DashboardPage() {
   const liveCount = data.menus.filter((m) => m.status === "live").length;
   const draftCount = data.menus.filter((m) => m.status === "draft").length;
 
+  const supabase = await createClient();
+  const { data: tenantRow } = await supabase
+    .from("tenants")
+    .select("plan")
+    .eq("id", staff.tenantId)
+    .single();
+  const plan = planOf(tenantRow?.plan);
+  const menuLimit = PLANS[plan].maxMenus;
+  const menuPct = menuLimit === Infinity ? 0 : Math.min(100, (data.menus.length / menuLimit) * 100);
+  const atMenuLimit = plan === "free" && data.menus.length >= menuLimit;
+
+  const activity = await getRecentActivity(6);
+
   return (
     <div className="space-y-6">
       <div className="flex flex-wrap items-end justify-between gap-3">
@@ -33,9 +51,12 @@ export default async function DashboardPage() {
           <p className="tabular text-[0.7rem] uppercase tracking-widest text-brass">Venue</p>
           <h1 className="font-display text-2xl text-porcelain">{data.restaurantName}</h1>
         </div>
-        <Link href={`/v/${data.restaurantSlug}`} target="_blank" rel="noopener" className={action}>
-          View live site ↗
-        </Link>
+        <div className="flex flex-wrap items-center gap-2">
+          {staff.role === "owner" && <AddVenueButton className={action} />}
+          <Link href={`/v/${data.restaurantSlug}`} target="_blank" rel="noopener" className={action}>
+            View live site ↗
+          </Link>
+        </div>
       </div>
 
       <div className="grid grid-cols-3 gap-3">
@@ -43,6 +64,37 @@ export default async function DashboardPage() {
         <Stat label="Items" value={totalItems} />
         <Stat label="Live" value={liveCount} sub={draftCount ? `${draftCount} draft` : undefined} />
       </div>
+
+      <section className="rounded-card border border-hairline/25 p-4">
+        <div className="flex items-center justify-between">
+          <span className="font-display text-base text-porcelain">{PLAN_LABEL[plan]} plan</span>
+          <Link href="/admin/billing" className={action}>
+            Manage
+          </Link>
+        </div>
+        <div className="mt-3">
+          <div className="flex items-center justify-between text-xs text-muted">
+            <span>Menus</span>
+            <span className="tabular">
+              {data.menus.length} / {menuLimit === Infinity ? "∞" : menuLimit}
+            </span>
+          </div>
+          {menuLimit !== Infinity && (
+            <div className="mt-1.5 h-1.5 w-full overflow-hidden rounded-full bg-hairline/20">
+              <div className="h-full rounded-full bg-accent" style={{ width: `${menuPct}%` }} />
+            </div>
+          )}
+        </div>
+        {atMenuLimit && (
+          <p className="mt-2 text-xs text-brass">
+            You&rsquo;re at your menu limit —{" "}
+            <Link href="/admin/billing" className="underline">
+              upgrade to Pro
+            </Link>{" "}
+            for unlimited menus + all themes.
+          </p>
+        )}
+      </section>
 
       <section className="space-y-3">
         <div className="flex items-center justify-between">
@@ -94,6 +146,30 @@ export default async function DashboardPage() {
           </div>
         )}
       </section>
+
+      {activity.length > 0 && (
+        <section className="space-y-3">
+          <h2 className="font-display text-lg text-porcelain">Recent activity</h2>
+          <ul className="divide-y divide-hairline/10 rounded-card border border-hairline/20">
+            {activity.map((a) => (
+              <li key={a.id} className="flex items-baseline justify-between gap-3 px-4 py-2.5">
+                <span className="min-w-0 text-sm text-muted">
+                  <span className="text-porcelain">{a.actor}</span> {a.action} {a.entity}
+                  {a.name && (
+                    <>
+                      {" "}
+                      <span className="text-porcelain">“{a.name}”</span>
+                    </>
+                  )}
+                </span>
+                <span className="tabular shrink-0 text-[0.65rem] uppercase tracking-wider text-hairline">
+                  {timeAgo(a.at)}
+                </span>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
 
       <section className="space-y-3">
         <h2 className="font-display text-lg text-porcelain">Quick actions</h2>

@@ -1,5 +1,6 @@
 import { getCurrentStaff } from "@/lib/rbac";
 import { createClient } from "@/lib/supabase/server";
+import { getActiveVenueId } from "@/lib/venue/active";
 
 export type AdminMenu = {
   id: string;
@@ -27,8 +28,7 @@ export async function getAdminMenus(): Promise<{
   const { data: r } = await supabase
     .from("restaurants")
     .select("id, name, slug")
-    .eq("tenant_id", staff.tenantId)
-    .limit(1)
+    .eq("id", (await getActiveVenueId(staff.tenantId)) ?? "")
     .maybeSingle();
   if (!r) return null;
 

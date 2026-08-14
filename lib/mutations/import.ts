@@ -7,6 +7,7 @@ import { requireManager, type StaffContext } from "@/lib/rbac";
 import { slugify } from "@/lib/slug";
 import type { Database } from "@/lib/supabase/database.types";
 import { createClient } from "@/lib/supabase/server";
+import { getActiveVenueId } from "@/lib/venue/active";
 
 export type ImportRow = {
   category: string;
@@ -35,8 +36,7 @@ async function resolveRestaurantId(
   const { data } = await supabase
     .from("restaurants")
     .select("id")
-    .eq("tenant_id", staff.tenantId)
-    .limit(1)
+    .eq("id", (await getActiveVenueId(staff.tenantId)) ?? "")
     .maybeSingle();
   return data?.id ?? null;
 }

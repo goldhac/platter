@@ -2,9 +2,32 @@
 // (code-standards.md §6). Currency + locale come from the restaurant/tenant setting,
 // not a hardcoded symbol (foundation.md §7 #5).
 
-export type MoneyOpts = { currency?: string; locale?: string };
+export type SecondaryCurrency = { code: string; rate: number };
+export type MoneyOpts = { currency?: string; locale?: string; secondary?: SecondaryCurrency | null };
 
 const DEFAULTS = { currency: "NGN", locale: "en-NG" } as const;
+
+/**
+ * Optional dual-currency line: `formatSecondary(9000, { secondary: { code: "USD", rate: 0.00065 } })`
+ * → "≈ $5.85". Returns null when no secondary currency is configured (or the code is invalid).
+ * `rate` is secondary units per 1 primary unit.
+ */
+export function formatSecondary(amount: number, opts: MoneyOpts = {}): string | null {
+  const sec = opts.secondary;
+  if (!sec || !sec.code || !(sec.rate > 0)) return null;
+  const converted = amount * sec.rate;
+  try {
+    const s = new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: sec.code,
+      minimumFractionDigits: 0,
+      maximumFractionDigits: converted < 20 ? 2 : 0,
+    }).format(converted);
+    return `≈ ${s}`;
+  } catch {
+    return null; // unknown ISO currency code
+  }
+}
 
 /**
  * Format an amount as a grouped currency string with no decimals on whole amounts.

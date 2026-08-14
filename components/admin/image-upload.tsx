@@ -6,6 +6,7 @@ import { useRef, useState } from "react";
 import Cropper from "react-easy-crop";
 import "react-easy-crop/react-easy-crop.css";
 import { toast } from "sonner";
+import { generateItemImage, touchUpItemImage } from "@/lib/mutations/generate-image";
 import { cropToWebp, type CropArea } from "@/lib/image";
 import { createClient } from "@/lib/supabase/browser";
 
@@ -17,16 +18,23 @@ export function ImageUpload({
   tenantId,
   value,
   onChange,
+  promptName,
+  promptDesc,
 }: {
   tenantId: string;
   value: string | null;
   onChange: (url: string | null) => void;
+  /** When provided, shows a "Generate" button that AI-creates a photo from name + description. */
+  promptName?: string;
+  promptDesc?: string;
 }) {
   const [src, setSrc] = useState<string | null>(null);
   const [crop, setCrop] = useState({ x: 0, y: 0 });
   const [zoom, setZoom] = useState(1);
   const [area, setArea] = useState<CropArea | null>(null);
   const [uploading, setUploading] = useState(false);
+  const [generating, setGenerating] = useState(false);
+  const [touchingUp, setTouchingUp] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
   function pick(e: React.ChangeEvent<HTMLInputElement>) {
@@ -63,6 +71,48 @@ export function ImageUpload({
     }
   }
 
+  async function generate() {
+    if (generating) return;
+    setGenerating(true);
+    const p = generateItemImage(promptName ?? "", promptDesc ?? "").then((r) => {
+      if (!r.ok) throw new Error(r.error);
+      onChange(r.url);
+    });
+    toast.promise(p, {
+      loading: "Generating photo… (~25s)",
+      success: "Photo generated",
+      error: (e: Error) => e.message,
+    });
+    try {
+      await p;
+    } catch {
+      /* surfaced by the toast */
+    } finally {
+      setGenerating(false);
+    }
+  }
+
+  async function touchUp() {
+    if (touchingUp || !value) return;
+    setTouchingUp(true);
+    const p = touchUpItemImage(value).then((r) => {
+      if (!r.ok) throw new Error(r.error);
+      onChange(r.url);
+    });
+    toast.promise(p, {
+      loading: "Touching up… (~25s)",
+      success: "Photo touched up",
+      error: (e: Error) => e.message,
+    });
+    try {
+      await p;
+    } catch {
+      /* surfaced by the toast */
+    } finally {
+      setTouchingUp(false);
+    }
+  }
+
   return (
     <div>
       <div className="flex items-center gap-3">
@@ -81,6 +131,26 @@ export function ImageUpload({
           >
             {value ? "Change photo" : "Add photo"}
           </button>
+          {promptName !== undefined && (
+            <button
+              type="button"
+              onClick={generate}
+              disabled={generating}
+              className="rounded-card border border-accent/40 px-3 py-1.5 text-xs text-accent hover:bg-accent/10 disabled:opacity-50"
+            >
+              {generating ? "Generating…" : "✨ Generate with AI"}
+            </button>
+          )}
+          {value && (
+            <button
+              type="button"
+              onClick={touchUp}
+              disabled={touchingUp}
+              className="rounded-card border border-accent/40 px-3 py-1.5 text-xs text-accent hover:bg-accent/10 disabled:opacity-50"
+            >
+              {touchingUp ? "Touching up…" : "✨ Touch up"}
+            </button>
+          )}
           {value && (
             <button
               type="button"

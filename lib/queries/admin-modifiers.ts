@@ -1,4 +1,6 @@
+import { getCurrentStaff } from "@/lib/rbac";
 import { createClient } from "@/lib/supabase/server";
+import { getActiveVenueId } from "@/lib/venue/active";
 
 export type ModifierGroupRow = {
   id: string;
@@ -11,10 +13,13 @@ export type ModifierGroupRow = {
 
 export async function getModifierGroups(): Promise<ModifierGroupRow[]> {
   const supabase = await createClient();
+  const staff = await getCurrentStaff();
+  const venueId = staff ? ((await getActiveVenueId(staff.tenantId)) ?? "") : "";
   const [{ data: groups }, { data: mods }] = await Promise.all([
     supabase
       .from("modifier_groups")
       .select("id, name, is_required, min_select, max_select")
+      .eq("restaurant_id", venueId)
       .order("name"),
     supabase.from("modifiers").select("group_id"),
   ]);
@@ -61,7 +66,13 @@ export async function getModifierGroupForEdit(id: string): Promise<EditableModif
 
 export async function getModifierGroupOptions(): Promise<{ id: string; name: string }[]> {
   const supabase = await createClient();
-  const { data } = await supabase.from("modifier_groups").select("id, name").order("name");
+  const staff = await getCurrentStaff();
+  const venueId = staff ? ((await getActiveVenueId(staff.tenantId)) ?? "") : "";
+  const { data } = await supabase
+    .from("modifier_groups")
+    .select("id, name")
+    .eq("restaurant_id", venueId)
+    .order("name");
   return (data ?? []).map((g) => ({ id: g.id, name: g.name }));
 }
 

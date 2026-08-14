@@ -2,11 +2,15 @@
 
 import { randomBytes } from "node:crypto";
 import { revalidatePath } from "next/cache";
+import { sendInviteEmail } from "@/lib/notify/email";
 import { requireOwner } from "@/lib/rbac";
 import { createClient } from "@/lib/supabase/server";
+import { getActiveVenueId, getTenantVenues } from "@/lib/venue/active";
 import { canAddTeamMember, limits, upgradeMessage } from "@/lib/plans";
 
-export type TeamResult = { ok: true; joinPath?: string } | { ok: false; error: string };
+export type TeamResult =
+  | { ok: true; joinPath?: string; emailed?: boolean }
+  | { ok: false; error: string };
 
 const EMAIL_RE = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
 const INVITE_TTL_MS = 14 * 24 * 60 * 60 * 1000; // 14 days
@@ -71,8 +75,23 @@ export async function inviteTeammate(emailRaw: unknown, roleRaw: unknown): Promi
   });
   if (iErr) return { ok: false, error: iErr.message };
 
+  const joinPath = `/admin/join?token=${token}`;
+
+  // Best-effort invite email — the share-link still works if mail isn't configured or fails.
+  const origin = (process.env.NEXT_PUBLIC_SITE_URL || "https://platter.goldhac.com").replace(/\/$/, "");
+  const venues = await getTenantVenues(staff.tenantId);
+  const activeId = await getActiveVenueId(staff.tenantId);
+  const venueName = venues.find((v) => v.id === activeId)?.name ?? venues[0]?.name ?? "your venue";
+  const mail = await sendInviteEmail({
+    to: email,
+    inviterName: staff.fullName ?? staff.email ?? "A teammate",
+    venueName,
+    role,
+    joinUrl: `${origin}${joinPath}`,
+  });
+
   revalidatePath("/admin/team");
-  return { ok: true, joinPath: `/admin/join?token=${token}` };
+  return { ok: true, joinPath, emailed: mail.ok };
 }
 
 /** Owner cancels a pending invite. */

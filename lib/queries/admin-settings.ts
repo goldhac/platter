@@ -1,5 +1,6 @@
 import { getCurrentStaff } from "@/lib/rbac";
 import { createClient } from "@/lib/supabase/server";
+import { getActiveVenueId } from "@/lib/venue/active";
 
 export type RestaurantSettings = {
   id: string;
@@ -13,6 +14,9 @@ export type RestaurantSettings = {
   ordering_enabled: boolean;
   sold_out_reset_time: string;
   accent: string;
+  /** Optional dual-currency: a 3-letter code + rate (secondary units per 1 primary). */
+  secondary_code: string;
+  secondary_rate: number | null;
 };
 
 export type OpeningHourRow = {
@@ -37,13 +41,16 @@ export async function getRestaurantSettings(): Promise<{
     .select(
       "id, name, name_zh, phone, whatsapp, address, currency, timezone, ordering_enabled, sold_out_reset_time, theme",
     )
-    .eq("tenant_id", staff.tenantId)
-    .limit(1)
+    .eq("id", (await getActiveVenueId(staff.tenantId)) ?? "")
     .maybeSingle();
 
   if (!r) return { restaurant: null, hours: [] };
 
-  const theme = (r.theme ?? {}) as { accent?: string };
+  const theme = (r.theme ?? {}) as {
+    accent?: string;
+    secondaryCurrency?: { code?: string; rate?: number };
+  };
+  const sc = theme.secondaryCurrency;
   const { data: hourRows } = await supabase
     .from("opening_hours")
     .select("weekday, opens, closes, is_closed")
@@ -75,6 +82,8 @@ export async function getRestaurantSettings(): Promise<{
       ordering_enabled: r.ordering_enabled,
       sold_out_reset_time: r.sold_out_reset_time,
       accent: theme.accent ?? DEFAULT_ACCENT,
+      secondary_code: sc?.code ?? "",
+      secondary_rate: typeof sc?.rate === "number" ? sc.rate : null,
     },
     hours,
   };

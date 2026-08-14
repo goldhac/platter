@@ -1,4 +1,6 @@
+import { getCurrentStaff } from "@/lib/rbac";
 import { createClient } from "@/lib/supabase/server";
+import { getActiveVenueId } from "@/lib/venue/active";
 
 export type AdminCategoryRow = {
   id: string;
@@ -12,14 +14,17 @@ export type AdminCategoryRow = {
 
 export async function getAdminCategories(): Promise<AdminCategoryRow[]> {
   const supabase = await createClient();
+  const staff = await getCurrentStaff();
+  const venueId = staff ? ((await getActiveVenueId(staff.tenantId)) ?? "") : "";
   const [{ data: cats }, { data: groups }, { data: items }] = await Promise.all([
     supabase
       .from("categories")
       .select("id, name, slug, group_id, is_active, sort_order")
+      .eq("restaurant_id", venueId)
       .is("deleted_at", null)
       .order("sort_order"),
-    supabase.from("menu_groups").select("id, name"),
-    supabase.from("items").select("category_id").is("deleted_at", null),
+    supabase.from("menu_groups").select("id, name").eq("restaurant_id", venueId),
+    supabase.from("items").select("category_id").eq("restaurant_id", venueId).is("deleted_at", null),
   ]);
 
   const groupName = new Map((groups ?? []).map((g) => [g.id, g.name]));
@@ -40,12 +45,15 @@ export async function getAdminCategories(): Promise<AdminCategoryRow[]> {
 /** Group options for the category picker, scoped to one menu when a slug is given. */
 export async function getGroupOptions(menuSlug?: string): Promise<{ id: string; name: string }[]> {
   const supabase = await createClient();
+  const staff = await getCurrentStaff();
+  const venueId = staff ? ((await getActiveVenueId(staff.tenantId)) ?? "") : "";
 
   let menuId: string | null = null;
   if (menuSlug) {
     const { data: menu } = await supabase
       .from("menus")
       .select("id")
+      .eq("restaurant_id", venueId)
       .eq("slug", menuSlug)
       .maybeSingle();
     menuId = menu?.id ?? null;
@@ -54,6 +62,7 @@ export async function getGroupOptions(menuSlug?: string): Promise<{ id: string; 
   const { data } = await supabase
     .from("menu_groups")
     .select("id, name, menu_id, sort_order")
+    .eq("restaurant_id", venueId)
     .order("sort_order");
   return (data ?? [])
     .filter((g) => menuId == null || g.menu_id === menuId)

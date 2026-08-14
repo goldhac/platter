@@ -1,5 +1,6 @@
 import { getCurrentStaff } from "@/lib/rbac";
 import { createClient } from "@/lib/supabase/server";
+import { getActiveVenueId } from "@/lib/venue/active";
 import { planOf } from "@/lib/plans";
 import type { PlanId } from "@/lib/plans";
 
@@ -27,8 +28,7 @@ export async function getBilling(): Promise<BillingData | null> {
   const { data: r } = await supabase
     .from("restaurants")
     .select("id, custom_domain")
-    .eq("tenant_id", staff.tenantId)
-    .limit(1)
+    .eq("id", (await getActiveVenueId(staff.tenantId)) ?? "")
     .maybeSingle();
 
   const nowIso = new Date().toISOString();

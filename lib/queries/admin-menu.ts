@@ -1,7 +1,10 @@
+import { getCurrentStaff } from "@/lib/rbac";
 import { createClient } from "@/lib/supabase/server";
+import { getActiveVenueId } from "@/lib/venue/active";
 
 // The admin sees everything within its tenant (drafts included), non-deleted.
-// RLS scopes every row to the caller's tenant automatically (security.md §2).
+// RLS scopes every row to the caller's tenant automatically (security.md §2); we further
+// scope to the active venue so a multi-venue tenant edits one venue's tree at a time.
 
 export type AdminItem = {
   id: string;
@@ -61,11 +64,14 @@ export type AdminTree = {
  */
 export async function getAdminMenuTree(menuSlug?: string): Promise<AdminTree> {
   const supabase = await createClient();
+  const staff = await getCurrentStaff();
+  const venueId = staff ? ((await getActiveVenueId(staff.tenantId)) ?? "") : "";
 
   // Drafts included — the editor edits unpublished menus too.
   const { data: menuRows, error: mErr } = await supabase
     .from("menus")
     .select("id, name, slug, is_default, status, sort_order")
+    .eq("restaurant_id", venueId)
     .neq("status", "archived")
     .order("sort_order");
   if (mErr) throw new Error(`getAdminMenuTree: menus failed: ${mErr.message}`);
@@ -85,12 +91,17 @@ export async function getAdminMenuTree(menuSlug?: string): Promise<AdminTree> {
     null;
 
   const [{ data: groupRows, error: gErr }, { data: catRows, error: cErr }] = await Promise.all([
-    supabase.from("menu_groups").select("id, name, slug, sort_order, menu_id").order("sort_order"),
+    supabase
+      .from("menu_groups")
+      .select("id, name, slug, sort_order, menu_id")
+      .eq("restaurant_id", venueId)
+      .order("sort_order"),
     supabase
       .from("categories")
       .select(
         "id, name, slug, sort_order, group_id, is_active, deleted_at, items(id, name, slug, base_price, is_available, is_featured, status, spice_level, image_url, category_id, sort_order, deleted_at)",
       )
+      .eq("restaurant_id", venueId)
       .is("deleted_at", null)
       .order("sort_order"),
   ]);
@@ -165,12 +176,17 @@ export async function getAdminMenuTree(menuSlug?: string): Promise<AdminTree> {
  */
 export async function getCategoryOptions(menuSlug?: string): Promise<{ id: string; name: string }[]> {
   const supabase = await createClient();
+  const staff = await getCurrentStaff();
+  const venueId = staff ? ((await getActiveVenueId(staff.tenantId)) ?? "") : "";
 
   let groupIds: Set<string> | null = null;
   if (menuSlug) {
+    // Menu slugs are unique per-venue, not globally — scope by venue so two venues'
+    // "menu" slugs never collide.
     const { data: menu } = await supabase
       .from("menus")
       .select("id")
+      .eq("restaurant_id", venueId)
       .eq("slug", menuSlug)
       .maybeSingle();
     if (menu) {
@@ -185,6 +201,7 @@ export async function getCategoryOptions(menuSlug?: string): Promise<{ id: strin
   const { data } = await supabase
     .from("categories")
     .select("id, name, group_id, sort_order")
+    .eq("restaurant_id", venueId)
     .is("deleted_at", null)
     .order("sort_order");
   return (data ?? [])

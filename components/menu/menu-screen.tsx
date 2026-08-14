@@ -1,12 +1,21 @@
+import dynamic from "next/dynamic";
+import { cookies } from "next/headers";
 import { notFound } from "next/navigation";
 import type { MoneyOpts } from "@/lib/format/currency";
 import { getMenu } from "@/lib/queries/menu";
+import { getCurrentStaff } from "@/lib/rbac";
 import { layoutSpec } from "@/components/menu/layouts";
+import { ItemAdminControls } from "@/components/menu/admin/item-controls";
 import { MenuBoard } from "@/components/menu/menu-board";
 import { MenuHeader } from "@/components/menu/menu-header";
 import { MenuSwitcher } from "@/components/menu/menu-switcher";
 import { ThemeProvider } from "@/components/theme/theme-provider";
 import { getTheme, resolveTheme } from "@/lib/themes";
+
+// Admin-only client layer — dynamically imported so customers never download it.
+const AdminLayer = dynamic(() => import("@/components/menu/admin/admin-layer"));
+// Diner concierge — code-split off the critical first-load (loads after hydration).
+const Concierge = dynamic(() => import("@/components/menu/concierge"));
 
 const SITE = process.env.NEXT_PUBLIC_SITE_URL ?? "";
 
@@ -33,7 +42,30 @@ export async function MenuScreen({
   const initialItemSlug = itemPath && itemPath.length >= 2 ? itemPath[1] : null;
 
   const menu = await getMenu(restaurantSlug, m);
-  const money: MoneyOpts = { currency: menu.restaurant.currency, locale: menu.restaurant.locale };
+  const money: MoneyOpts = {
+    currency: menu.restaurant.currency,
+    locale: menu.restaurant.locale,
+    secondary: menu.restaurant.secondary_currency,
+  };
+
+  // The viewer is an admin of THIS venue only if they're signed-in staff of its tenant.
+  // Skip the auth round-trip entirely for logged-out visitors (the common case) — only look
+  // up staff when a Supabase session cookie is actually present.
+  const cookieStore = await cookies();
+  const hasSession = cookieStore.getAll().some((c) => c.name.startsWith("sb-") && c.name.includes("auth"));
+  const staff = hasSession ? await getCurrentStaff() : null;
+  const isAdmin = !!staff && staff.tenantId === menu.restaurant.tenant_id;
+  const adminInfo =
+    isAdmin && staff
+      ? {
+          role: staff.role,
+          venueName: menu.restaurant.name,
+          dashboardHref: "/admin",
+          editMenuHref: "/admin/menu",
+          addItemHref: "/admin/items/new",
+          itemHrefBase: "/admin/items/",
+        }
+      : null;
 
   // Theme is data-driven (the active menu's record); `?theme=` previews another
   // shipped theme — the same override the customiser uses.
@@ -73,14 +105,18 @@ export async function MenuScreen({
     },
   };
 
-  return (
-    <ThemeProvider themeId={themeId} config={themeConfig} className="min-h-screen">
-      <div className="mx-auto max-w-xl px-5">
+  const body = (
+    <main className="mx-auto max-w-xl px-5">
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
-        <MenuHeader restaurant={menu.restaurant} openState={menu.openState} />
+        <MenuHeader
+          restaurant={menu.restaurant}
+          openState={menu.openState}
+          shareUrl={`${SITE}${basePath}`}
+          printHref={`/v/${menu.restaurant.slug}/print`}
+        />
         <MenuSwitcher menus={menu.menus} activeSlug={menu.activeMenuSlug} />
 
         <MenuBoard
@@ -90,26 +126,63 @@ export async function MenuScreen({
           railCategories={railCategories}
           layout={layout}
           basePath={basePath}
+          admin={isAdmin}
+          whatsapp={menu.restaurant.whatsapp}
+          venueName={menu.restaurant.name}
         >
           <div className="pb-28">
+            {menu.popular.length >= 3 && (
+              <section className="menu-section pt-8" aria-labelledby="pop-heading">
+                <div className="flex items-center gap-2.5 pb-3.5">
+                  <span id="pop-heading" className="font-mono text-[10px] uppercase tracking-[0.2em] text-hairline-strong">
+                    Most ordered
+                  </span>
+                  <span
+                    aria-hidden
+                    className="h-px flex-1"
+                    style={{ background: "color-mix(in srgb, var(--color-hairline-strong) 28%, transparent)" }}
+                  />
+                </div>
+                <ul className={listClassName}>
+                  {menu.popular.map((item) => (
+                    <li key={`pop-${item.id}`} className={isAdmin ? "group relative" : undefined}>
+                      <Item item={item} money={money} basePath={basePath} />
+                      {isAdmin && <ItemAdminControls item={item} />}
+                    </li>
+                  ))}
+                </ul>
+              </section>
+            )}
             {menu.groups.map((group) => (
               <div key={group.id}>
-                <div className="mt-8 flex items-baseline gap-2 border-b border-hairline/20 pb-2">
-                  <span className="font-display text-lg text-text/90">{group.name}</span>
-                  {group.name_zh && (
-                    <span className="font-cjk text-sm text-accent/80">{group.name_zh}</span>
-                  )}
+                <div className="mt-9 flex items-center gap-2 first:mt-6">
+                  <span className="font-mono text-[9px] uppercase tracking-[0.2em] text-text-tertiary">{group.name}</span>
+                  {group.name_zh && <span className="font-cjk text-[11px] text-text-tertiary/80">{group.name_zh}</span>}
                 </div>
 
                 {group.categories.map((cat) => (
-                  <section key={cat.id} id={`cat-${cat.slug}`} className="menu-section">
-                    <h2 className="tabular pt-5 text-[0.72rem] uppercase tracking-[0.22em] text-hairline">
-                      {cat.name}
-                    </h2>
+                  <section key={cat.id} id={`cat-${cat.slug}`} className="menu-section pt-8">
+                    <div className="flex items-baseline gap-3">
+                      <h2 className="font-display text-[31px] font-normal leading-none tracking-[-0.022em] text-text">
+                        {cat.name}
+                      </h2>
+                      {cat.name_zh && <span className="font-cjk text-[15px] text-text-tertiary">{cat.name_zh}</span>}
+                    </div>
+                    <div
+                      className="mt-4 h-px"
+                      style={{ background: "linear-gradient(90deg, color-mix(in srgb, var(--color-hairline-strong) 45%, transparent), color-mix(in srgb, var(--color-hairline-strong) 4%, transparent))" }}
+                    />
                     <ul className={listClassName}>
                       {cat.items.map((item) => (
-                        <li key={item.id}>
+                        <li
+                          key={item.id}
+                          className={isAdmin ? "group relative" : undefined}
+                          data-draft-item={
+                            isAdmin && item.status !== "published" ? "" : undefined
+                          }
+                        >
                           <Item item={item} money={money} basePath={basePath} />
+                          {isAdmin && <ItemAdminControls item={item} />}
                         </li>
                       ))}
                     </ul>
@@ -119,7 +192,21 @@ export async function MenuScreen({
             ))}
           </div>
         </MenuBoard>
-      </div>
+    </main>
+  );
+
+  return (
+    <ThemeProvider themeId={themeId} config={themeConfig} className="min-h-screen">
+      {adminInfo ? (
+        <AdminLayer admin={adminInfo} itemsBySlug={menu.itemsBySlug}>
+          {body}
+        </AdminLayer>
+      ) : (
+        body
+      )}
+      {!isAdmin && (
+        <Concierge venue={menu.restaurant.slug} m={menu.activeMenuSlug} venueName={menu.restaurant.name} />
+      )}
     </ThemeProvider>
   );
 }

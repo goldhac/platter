@@ -140,7 +140,7 @@ Full policy is owned by [`security.md`](security.md); the mechanism:
 Record the resolution in [`progress-log.md`](progress-log.md) as a `decision` entry when made, and update the affected file.
 
 - 🕗 **Client image cropper** — `react-easy-crop` vs. a hand-rolled canvas crop for the square-crop→WebP pipeline (A7).
-- 🕗 **Client search lib** — `fuse.js` vs. `match-sorter` for the <100ms fuzzy search over ~400 items (P5); weigh against the 120KB JS budget (`§7 #6`).
+- 🕗 **Client search lib** — `fuse.js` vs. `match-sorter` for the <100ms fuzzy search over ~400 items (P5); weigh against the 215KB JS budget (`§7 #6`).
 - 🕗 **Edge OG font loading** — how Fraunces/Plex load inside `next/og` without blowing the edge bundle.
 - 🕗 **Per-tenant cache-tag switch** — when to move from `menu` to `menu:{tenantId}` (at tenant #2).
 - 🕗 **Realtime transport for the order board** (Phase 2) — Supabase channels vs. Postgres changes.

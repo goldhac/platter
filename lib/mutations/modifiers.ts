@@ -5,6 +5,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { requireManager, type StaffContext } from "@/lib/rbac";
 import type { Database } from "@/lib/supabase/database.types";
 import { createClient } from "@/lib/supabase/server";
+import { getActiveVenueId } from "@/lib/venue/active";
 
 export type ModifierOption = { name: string; price_delta: number };
 export type ModifierGroupInput = {
@@ -25,8 +26,7 @@ async function resolveRestaurantId(
   const { data } = await supabase
     .from("restaurants")
     .select("id")
-    .eq("tenant_id", staff.tenantId)
-    .limit(1)
+    .eq("id", (await getActiveVenueId(staff.tenantId)) ?? "")
     .maybeSingle();
   return data?.id ?? null;
 }
