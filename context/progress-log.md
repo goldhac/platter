@@ -23,6 +23,11 @@
 
 ## Entries
 
+### 2026-08-13 · chore · Published to GitHub (public) + first commit of the full tree
+- **area:** infra
+- **what:** Created **github.com/goldhac/platter** (public, default `main`) and pushed the whole project as one commit (153 files) — the first time the codebase is off-machine. Added a public-facing `README.md` (what Platter is, live link, feature table, stack, structure, local-dev, deploy; the old context-system map is folded into a "Working on this repo" section so CLAUDE.md's contract holds) and completed `.env.example` (all env vars the app reads, placeholders only). Fast-forwarded local `main` (was 21 behind) to the work and switched onto it.
+- **notes:** **Secret audit before pushing:** `.env.local` is git-ignored and confirmed absent from the remote; a tree-wide scan for JWT/`AIza`/`re_`/`sk-`/`gh*_` patterns found nothing hardcoded. Deploys still go via `railway up` (Railway isn't wired to GitHub) — git is now the backup/history, not the deploy trigger. **Heads-up (flagged to Gold):** `context/` + `docs/` are now public, incl. `foundation.md` (business/pricing reasoning), the PRDs, and the roadmap — prune/gitignore those if internal-only was intended.
+
 ### 2026-08-13 · feature · v2 REDESIGN — item detail sheet (menu now coherent, ready to ship)
 - **area:** components/menu
 - **what:** Rebuilt `item-sheet.tsx` to the v2 ceremonial language — the last diner-menu piece. Gilt grabber; **hero** = photo in a `rounded-lg` framed skeleton, or (no photo) the debossed **seal plate** with a large `framed` `Seal` (glyph = the dish's own 中文 initial, else 餐); **Bodoni** title + gilt (`hairline-strong`) 中文 subtitle; chef/spicy/veg `SealMark`s top-right; a **L→R gilt-fade rule**; the **full** description (the reveal the one-line row withholds); price as a **Martian-mono ledger figure** with the `≈ $` dual-currency line (portion cards when variants exist, each with its own secondary line); **octagon `SpicePips`** + spice label; allergen/dietary chips; a letterspaced mono CLOSE. Kept the Radix Dialog a11y (role/aria-modal/focus-trap/Esc/restore) and the `data-sheet` hooks that drive the slide-up/fade in globals.css.
