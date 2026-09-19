@@ -25,10 +25,11 @@ export const counter: ThemeManifest = {
   },
 
   typography: {
-    // tight grotesk (Inter, not the serif) + oversized tabular numerals
-    display: { var: "var(--font-inter)", fallback: "ui-sans-serif, system-ui, sans-serif" },
-    body: { var: "var(--font-inter)", fallback: "ui-sans-serif, system-ui, sans-serif" },
-    numeric: { var: "var(--font-plex-mono)", fallback: "ui-monospace, monospace" },
+    // v2 platform faces; Counter keeps a sans display (Public Sans, not the serif) for its
+    // bright, modern, appetite-first character + oversized tabular numerals.
+    display: { var: "var(--font-public-sans)", fallback: "ui-sans-serif, system-ui, sans-serif" },
+    body: { var: "var(--font-public-sans)", fallback: "ui-sans-serif, system-ui, sans-serif" },
+    numeric: { var: "var(--font-martian)", fallback: "ui-monospace, monospace" },
     cjk: { var: "var(--font-noto-serif-sc)", fallback: "ui-serif, serif" },
   },
 

@@ -30,11 +30,10 @@ export const carafe: ThemeManifest = {
   },
 
   typography: {
-    // Reuses the loaded faces for now (per-theme font loading is the M3 optimization);
-    // Fraunces carries the small-caps, list-like heads well.
-    display: { var: "var(--font-fraunces)", fallback: "ui-serif, Georgia, serif" },
-    body: { var: "var(--font-inter)", fallback: "ui-sans-serif, system-ui, sans-serif" },
-    numeric: { var: "var(--font-plex-mono)", fallback: "ui-monospace, monospace" },
+    // v2 platform faces. Bodoni's high-contrast didone suits a printed drinks list.
+    display: { var: "var(--font-bodoni)", fallback: "ui-serif, Georgia, serif" },
+    body: { var: "var(--font-public-sans)", fallback: "ui-sans-serif, system-ui, sans-serif" },
+    numeric: { var: "var(--font-martian)", fallback: "ui-monospace, monospace" },
     cjk: { var: "var(--font-noto-serif-sc)", fallback: "ui-serif, serif" },
   },
 

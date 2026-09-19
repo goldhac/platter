@@ -26,10 +26,10 @@ export const palm: ThemeManifest = {
   },
 
   typography: {
-    // chunky slab feel via Fraunces display; generous body
-    display: { var: "var(--font-fraunces)", fallback: "ui-serif, Georgia, serif" },
-    body: { var: "var(--font-inter)", fallback: "ui-sans-serif, system-ui, sans-serif" },
-    numeric: { var: "var(--font-plex-mono)", fallback: "ui-monospace, monospace" },
+    // v2 platform faces; Bodoni display carries Palm's generous editorial headings.
+    display: { var: "var(--font-bodoni)", fallback: "ui-serif, Georgia, serif" },
+    body: { var: "var(--font-public-sans)", fallback: "ui-sans-serif, system-ui, sans-serif" },
+    numeric: { var: "var(--font-martian)", fallback: "ui-monospace, monospace" },
     cjk: { var: "var(--font-noto-serif-sc)", fallback: "ui-serif, serif" },
   },
 
