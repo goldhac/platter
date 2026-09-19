@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { createClient } from "@/lib/supabase/browser";
 
-export function SignOutButton() {
+export function SignOutButton({ className, label }: { className?: string; label?: string }) {
   const router = useRouter();
   const [busy, setBusy] = useState(false);
 
@@ -18,9 +18,12 @@ export function SignOutButton() {
         router.push("/admin/login");
         router.refresh();
       }}
-      className="rounded-card border border-hairline/30 px-3 py-1.5 text-xs text-muted outline-none transition-colors hover:text-porcelain focus-visible:ring-2 focus-visible:ring-accent/70 disabled:opacity-50"
+      className={
+        className ??
+        "rounded-sm border border-hairline px-3 py-1.5 text-xs text-text-secondary outline-none transition-colors hover:text-text focus-visible:ring-2 focus-visible:ring-accent/60 disabled:opacity-50"
+      }
     >
-      {busy ? "Signing out…" : "Sign out"}
+      {busy ? "Signing out…" : (label ?? "Sign out")}
     </button>
   );
 }

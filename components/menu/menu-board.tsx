@@ -223,7 +223,7 @@ export function MenuBoard({
 
       {searching ? (
         <div className="pb-28 pt-4">
-          <div className="tabular mb-3 flex items-center justify-between text-[0.7rem] uppercase tracking-[0.2em] text-hairline">
+          <div className="tabular mb-3 flex items-center justify-between text-[0.7rem] uppercase tracking-[0.2em] text-text-secondary">
             <span>
               {results.length} result{results.length === 1 ? "" : "s"}
             </span>
@@ -257,7 +257,7 @@ export function MenuBoard({
                     Ask us on WhatsApp
                   </a>
                 ) : (
-                  <p className="mt-1 text-xs text-hairline">Try a different search or clear the filters.</p>
+                  <p className="mt-1 text-xs text-text-secondary">Try a different search or clear the filters.</p>
                 );
               })()}
             </div>

@@ -28,11 +28,11 @@ export default async function OnboardingPage() {
   if (error) {
     return (
       <div className="mx-auto max-w-md px-5 py-16 text-center">
-        <h1 className="font-display text-2xl text-porcelain">We couldn&apos;t finish setup</h1>
-        <p className="mt-2 text-sm text-muted">{error.message}</p>
+        <h1 className="font-display text-2xl text-text">We couldn&apos;t finish setup</h1>
+        <p className="mt-2 text-sm text-text-secondary">{error.message}</p>
         <Link
           href="/admin/onboarding"
-          className="tabular mt-5 inline-block rounded-card bg-accent px-4 py-2 text-xs uppercase tracking-wider text-porcelain hover:opacity-90"
+          className="mt-5 inline-block rounded-sm bg-accent px-4 py-2.5 font-mono text-xs uppercase tracking-wider text-on-accent transition-colors hover:bg-accent-hover"
         >
           Try again
         </Link>
@@ -53,7 +53,7 @@ export default async function OnboardingPage() {
   return (
     <div className="mx-auto max-w-xl px-5 py-12">
       <header className="mb-8 text-center">
-        <span className="tabular text-[0.7rem] uppercase tracking-widest text-brass">Welcome to Platter</span>
+        <span className="font-mono text-[0.7rem] uppercase tracking-[0.16em] text-hairline-strong">Welcome to Platter</span>
       </header>
       <OnboardingWizard
         initial={{

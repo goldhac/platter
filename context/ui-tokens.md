@@ -1,5 +1,8 @@
 # Platter — UI Tokens
 
+> ## ⚠️ SUPERSEDED BY v2 (2026-08) — this doc describes the v1 system, not what ships.
+> The live design system is **dark-first oxblood/gilt/bone + Bodoni Moda / Public Sans / Martian Mono / Noto Serif SC + the chamfered-octagon seal**. **Source of truth:** `app/globals.css` `@theme` and the `design_handoff_platter_v2` handoff (README + MOBILE.md). Everything below — lacquer/brass/porcelain, Fraunces/Inter/IBM Plex, porcelain *light* surfaces, 4px radius, "dark-only" — is **historical (v1)**. Keep the layered token *architecture* and the "components consume tokens only" invariant; ignore the specific v1 values. A full rewrite of this file to v2 is a tracked follow-up (`progress-log.md` 2026-09-18).
+
 > The design tokens and the layered architecture they follow. **Source:** drafted directly from the PRD's fully-specified design system (`docs/PRD-jin-canting-menu.md §10.1`), not from a Claude Design export — the direction was already locked (`foundation.md §7 #17`). If a Claude Design export is later committed, regenerate this from it. For *how* tokens compose into screens, see [`ui-rules.md`](ui-rules.md); for *why* this look, `foundation.md §4 #5`.
 >
 > **The invariant:** components consume **tokens only** — no raw hex, no off-palette values, ever. A raw color in a component is a bug.

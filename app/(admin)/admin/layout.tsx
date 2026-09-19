@@ -4,7 +4,7 @@ import { Toaster } from "sonner";
 // login page can render; the gate lives in (workspace)/layout.tsx.
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="min-h-dvh bg-ink text-porcelain">
+    <div className="min-h-dvh bg-bg text-text">
       {children}
       <Toaster theme="dark" position="top-center" richColors closeButton />
     </div>

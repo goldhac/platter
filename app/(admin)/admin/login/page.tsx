@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { OCTAGON } from "@/components/menu/seal-mark";
 import { createClient } from "@/lib/supabase/browser";
 
 export default function LoginPage() {
@@ -47,25 +48,61 @@ export default function LoginPage() {
   }
 
   const inputClass =
-    "w-full rounded-card border border-hairline/30 bg-black/20 px-3 py-2.5 text-porcelain outline-none focus-visible:ring-2 focus-visible:ring-accent/70";
+    "h-[52px] w-full rounded-sm border border-hairline bg-surface-sunken px-3.5 text-base text-text outline-none transition-shadow placeholder:text-text-tertiary focus-visible:border-accent focus-visible:ring-2 focus-visible:ring-accent/40";
 
   return (
-    <div className="flex min-h-dvh items-center justify-center px-5">
+    <div className="flex min-h-dvh items-center justify-center px-6 py-16">
       <div className="w-full max-w-sm">
-        <div className="mb-8 text-center">
-          <div className="font-cjk text-xl text-accent">金餐厅</div>
-          <h1 className="mt-1 font-display text-3xl text-porcelain">Platter Manager</h1>
-          <p className="mt-1 text-sm text-muted">Sign in to manage the menu</p>
+        <div className="mb-9 text-center">
+          <span
+            className="mx-auto grid h-[52px] w-[52px] place-items-center bg-accent font-display text-2xl text-on-accent"
+            style={{ clipPath: OCTAGON }}
+            aria-hidden
+          >
+            P
+          </span>
+          <h1 className="mt-5 font-display text-[33px] leading-none tracking-[-0.02em] text-text">Platter Manager</h1>
+          <p className="mt-3 text-sm text-text-secondary">Sign in to manage your menu.</p>
         </div>
 
         {magicSent ? (
-          <div className="rounded-card border border-hairline/30 p-4 text-center text-sm text-muted">
-            Check <span className="text-porcelain">{email}</span> for a sign-in link.
+          <div role="status" className="text-center">
+            <span
+              className="mx-auto grid h-[68px] w-[68px] place-items-center bg-positive/15 font-cjk text-3xl text-positive"
+              style={{ clipPath: OCTAGON }}
+              aria-hidden
+            >
+              信
+            </span>
+            <h2 className="mt-5 font-display text-[28px] leading-none tracking-[-0.02em] text-text">Check your inbox.</h2>
+            <p className="mt-3 text-sm leading-relaxed text-text-secondary">
+              We sent a sign-in link to <span className="text-text">{email}</span>. It expires in about an hour.
+            </p>
+            <div className="mt-6 flex flex-col gap-2.5">
+              <button
+                type="button"
+                onClick={sendMagicLink}
+                disabled={busy}
+                className="h-[50px] w-full rounded-sm border border-hairline text-sm text-text-secondary outline-none transition-colors hover:border-hairline-strong hover:text-text focus-visible:ring-2 focus-visible:ring-accent/50 disabled:opacity-50"
+              >
+                {busy ? "Sending…" : "Send it again"}
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setMagicSent(false);
+                  setError(null);
+                }}
+                className="h-[50px] w-full rounded-sm text-sm text-text-tertiary outline-none transition-colors hover:text-text focus-visible:ring-2 focus-visible:ring-accent/50"
+              >
+                Use a different email
+              </button>
+            </div>
           </div>
         ) : (
-          <form onSubmit={signInWithPassword} className="space-y-3">
+          <form onSubmit={signInWithPassword} className="space-y-4">
             <label className="block">
-              <span className="mb-1 block text-xs uppercase tracking-wider text-muted">Email</span>
+              <span className="mb-1.5 block font-mono text-[10px] uppercase tracking-[0.16em] text-text-secondary">Email</span>
               <input
                 type="email"
                 required
@@ -76,7 +113,7 @@ export default function LoginPage() {
               />
             </label>
             <label className="block">
-              <span className="mb-1 block text-xs uppercase tracking-wider text-muted">Password</span>
+              <span className="mb-1.5 block font-mono text-[10px] uppercase tracking-[0.16em] text-text-secondary">Password</span>
               <input
                 type="password"
                 required
@@ -88,7 +125,7 @@ export default function LoginPage() {
             </label>
 
             {error && (
-              <p role="alert" className="text-sm text-accent">
+              <p role="alert" className="text-sm text-danger-on-soft">
                 {error}
               </p>
             )}
@@ -96,25 +133,31 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={busy}
-              className="w-full rounded-card bg-accent py-2.5 text-sm font-medium text-porcelain outline-none transition-opacity hover:opacity-90 focus-visible:ring-2 focus-visible:ring-accent/70 disabled:opacity-50"
+              className="h-[52px] w-full rounded-sm bg-accent text-sm font-semibold uppercase tracking-[0.08em] text-on-accent outline-none transition-colors hover:bg-accent-hover focus-visible:ring-2 focus-visible:ring-accent/50 disabled:opacity-50"
             >
               {busy ? "Signing in…" : "Sign in"}
             </button>
+
+            <div className="flex items-center gap-3 py-1" aria-hidden>
+              <span className="h-px flex-1 bg-hairline" />
+              <span className="font-mono text-[10px] uppercase tracking-[0.16em] text-text-tertiary">or</span>
+              <span className="h-px flex-1 bg-hairline" />
+            </div>
 
             <button
               type="button"
               onClick={sendMagicLink}
               disabled={busy}
-              className="w-full rounded-card border border-hairline/30 py-2.5 text-sm text-muted outline-none transition-colors hover:text-porcelain focus-visible:ring-2 focus-visible:ring-accent/70 disabled:opacity-50"
+              className="h-[52px] w-full rounded-sm border border-hairline text-sm text-text-secondary outline-none transition-colors hover:border-hairline-strong hover:text-text focus-visible:ring-2 focus-visible:ring-accent/50 disabled:opacity-50"
             >
-              Email me a magic link instead
+              Email me a magic link
             </button>
           </form>
         )}
 
-        <p className="mt-4 text-center text-xs text-muted">
+        <p className="mt-6 text-center text-xs text-text-secondary">
           New to Platter?{" "}
-          <Link href="/admin/signup" className="text-brass hover:text-porcelain">
+          <Link href="/admin/signup" className="text-hairline-strong underline-offset-2 hover:text-text hover:underline">
             Create an account
           </Link>
         </p>

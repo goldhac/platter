@@ -26,6 +26,20 @@ export const PLANS: Record<PlanId, PlanLimits> = {
 
 export const PLAN_LABEL: Record<PlanId, string> = { free: "Free", pro: "Pro" };
 
+export type PlanFeatureRow = { label: string; free: string; pro: string };
+
+/** The public plan comparison — one source of truth for /pricing, the billing view,
+ * and the landing ledger (the three used to disagree on rows and wording). */
+export const PLAN_FEATURE_ROWS: readonly PlanFeatureRow[] = [
+  { label: "Menus", free: "1", pro: "Unlimited" },
+  { label: "AI menu import", free: "Included", pro: "Included" },
+  { label: "QR codes & print", free: "Included", pro: "Included" },
+  { label: "Themes", free: "Lacquer", pro: "All 4 + customiser" },
+  { label: "Custom domain", free: "—", pro: "Included" },
+  { label: "Team seats", free: "1 (owner)", pro: String(PLANS.pro.teamSeats) },
+  { label: "Platter branding", free: "Shown", pro: "Removed" },
+];
+
 export function planOf(plan: string | null | undefined): PlanId {
   return plan === "pro" ? "pro" : "free";
 }
