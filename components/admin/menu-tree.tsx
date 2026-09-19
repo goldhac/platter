@@ -179,6 +179,7 @@ function CategoryBlock({
 }) {
   const router = useRouter();
   const [, start] = useTransition();
+  const [manualOpen, setManualOpen] = useState(false);
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
@@ -216,10 +217,21 @@ function CategoryBlock({
     });
   }
 
+  // Categories collapse by default so a long menu stays navigable; a filter forces them open.
+  const open = q.length > 0 ? true : manualOpen;
   return (
-    <details open className="pl-1">
+    <details
+      open={open}
+      onToggle={(e) => {
+        if (!q) setManualOpen(e.currentTarget.open);
+      }}
+      className="pl-1"
+    >
       <summary className="flex cursor-pointer list-none items-center justify-between py-2">
-        <span className="tabular text-[0.72rem] uppercase tracking-[0.18em] text-brass">{cat.name}</span>
+        <span className="flex items-center gap-2">
+          <span className={cn("text-[0.55rem] text-brass transition-transform", open && "rotate-90")}>▸</span>
+          <span className="tabular text-[0.72rem] uppercase tracking-[0.18em] text-brass">{cat.name}</span>
+        </span>
         <span className="tabular text-[0.7rem] text-muted">{filtered.length}</span>
       </summary>
 
