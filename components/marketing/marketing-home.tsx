@@ -2,6 +2,7 @@
 import Link from "next/link";
 import { listThemes } from "@/lib/themes";
 import { LandingFaq } from "./landing-faq";
+import { MobileNav } from "./mobile-nav";
 import { RevealObserver } from "./reveal-observer";
 
 // Platter v2 marketing landing: product-led redesign (2026-08). The product is the hero, not
@@ -173,15 +174,23 @@ export function MarketingHome() {
             <img src="/brand/platter-mark-bone.png" alt="" style={{ height: 26, width: "auto", display: "block" }} />
             <span style={{ fontFamily: SERIF, fontSize: 20, letterSpacing: "-.01em" }}>Platter</span>
           </Link>
-          <nav style={{ display: "flex", alignItems: "center", gap: 24, fontSize: 14, color: TEXT2 }} className="max-sm:hidden">
+          <nav style={{ gap: 24, fontSize: 14, color: TEXT2 }} className="max-sm:hidden flex items-center">
             <a href="#features">Features</a>
             <a href="#import">Import</a>
             <a href="#pricing">Pricing</a>
             <Link href="/admin/login">Sign in</Link>
           </nav>
-          <Link href="/admin/signup" className="inline-flex items-center font-bold" style={{ height: 38, padding: "0 18px", borderRadius: 7, background: ACCENT, color: "#fff", fontSize: 13.5 }}>
+          <Link href="/admin/signup" className="inline-flex items-center font-bold max-sm:hidden" style={{ height: 38, padding: "0 18px", borderRadius: 7, background: ACCENT, color: "#fff", fontSize: 13.5 }}>
             Get started
           </Link>
+          <MobileNav
+            links={[
+              ["#features", "Features"],
+              ["#import", "Import"],
+              ["#pricing", "Pricing"],
+              ["/admin/login", "Sign in"],
+            ]}
+          />
         </div>
       </header>
 

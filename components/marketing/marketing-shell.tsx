@@ -1,5 +1,6 @@
 /* eslint-disable @next/next/no-img-element -- brand mark, tiny */
 import Link from "next/link";
+import { MobileNav } from "./mobile-nav";
 
 // Platter v2 marketing chrome (redesign 2026-08) — sticky blur nav + footer, dark oxblood/bone.
 // Used by the non-hero marketing pages (/themes, /discover, /pricing). The landing (/) carries
@@ -26,7 +27,7 @@ export function MarketingShell({ active, children }: { active?: "discover" | "th
             <img src="/brand/platter-mark-bone.png" alt="" style={{ height: 26, width: "auto", display: "block" }} />
             <span style={{ fontFamily: SERIF, fontSize: 20, letterSpacing: "-.01em" }}>Platter</span>
           </Link>
-          <nav style={{ display: "flex", alignItems: "center", gap: 22, fontSize: 14 }} className="max-sm:hidden">
+          <nav style={{ gap: 22, fontSize: 14 }} className="max-sm:hidden flex items-center">
             {link("/discover", "Discover", "discover")}
             {link("/themes", "Themes", "themes")}
             {link("/#pricing", "Pricing", "pricing")}
@@ -34,11 +35,12 @@ export function MarketingShell({ active, children }: { active?: "discover" | "th
           </nav>
           <Link
             href="/admin/signup"
-            className="inline-flex items-center font-semibold"
+            className="inline-flex items-center font-semibold max-sm:hidden"
             style={{ height: 38, padding: "0 18px", borderRadius: 7, background: "var(--color-accent-hover)", color: "var(--color-on-accent)", fontSize: 13.5 }}
           >
             Get started
           </Link>
+          <MobileNav />
         </div>
       </header>
 
