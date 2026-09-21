@@ -34,8 +34,18 @@ type FormValues = {
 };
 
 const field =
-  "w-full rounded-card border border-hairline/30 bg-black/20 px-3 py-2.5 text-sm text-porcelain outline-none focus-visible:ring-2 focus-visible:ring-accent/70";
-const label = "mb-1 block text-xs uppercase tracking-wider text-muted";
+  "w-full rounded-sm border border-hairline bg-surface-sunken px-3.5 py-2.5 text-sm text-text outline-none placeholder:text-text-tertiary focus-visible:border-accent focus-visible:ring-2 focus-visible:ring-accent/40";
+const label = "mb-1.5 block font-mono text-[10px] uppercase tracking-[0.16em] text-text-secondary";
+const check = "accent-[var(--color-accent)]";
+
+function SectionHead({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="flex items-center gap-3 pt-2">
+      <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-hairline-strong">{children}</span>
+      <span className="h-px flex-1 bg-hairline" />
+    </div>
+  );
+}
 
 export function ItemForm({
   categories,
@@ -131,7 +141,9 @@ export function ItemForm({
   }
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+    <form onSubmit={handleSubmit(onSubmit)} className="max-w-2xl space-y-4">
+      {/* ── Basics ── */}
+      <SectionHead>Basics</SectionHead>
       <div>
         <span className={label}>Photo</span>
         <ImageUpload
@@ -142,52 +154,49 @@ export function ItemForm({
           promptDesc={watch("description")}
         />
       </div>
-
       <div>
         <span className={label}>Category</span>
         <select className={field} {...register("category_id", { required: true })}>
           {categories.map((c) => (
-            <option key={c.id} value={c.id} className="bg-ink">
+            <option key={c.id} value={c.id} className="bg-surface">
               {c.name}
             </option>
           ))}
         </select>
       </div>
-
       <div>
         <span className={label}>Name</span>
         <input className={field} {...register("name", { required: true })} />
-        {errors.name && <p className="mt-1 text-xs text-accent">Name is required</p>}
+        {errors.name && <p className="mt-1 text-xs text-danger-on-soft">Name is required</p>}
       </div>
-
       <div>
         <span className={label}>Name (中文)</span>
         <input className={`${field} font-cjk`} {...register("name_zh")} />
       </div>
-
       <div>
         <span className={label}>Description</span>
         <textarea rows={3} className={field} {...register("description")} />
       </div>
 
+      {/* ── Price ── */}
+      <SectionHead>Price</SectionHead>
       <div className="grid grid-cols-2 gap-3">
         <div>
           <span className={label}>Price (₦)</span>
           <input
-            className={`${field} tabular`}
+            className={`${field} font-mono`}
             inputMode="numeric"
             {...register("base_price", { required: true })}
           />
         </div>
         <div>
           <span className={label}>Compare-at (₦)</span>
-          <input className={`${field} tabular`} inputMode="numeric" {...register("compare_at_price")} />
+          <input className={`${field} font-mono`} inputMode="numeric" {...register("compare_at_price")} />
         </div>
       </div>
-
       <div>
         <span className={label}>Portions / variants (optional)</span>
-        <p className="mb-2 text-xs text-muted">
+        <p className="mb-2 text-xs text-text-secondary">
           e.g. &ldquo;6 pieces&rdquo; — the card then shows &ldquo;from ₦…&rdquo; (fixes D7).
         </p>
         <div className="space-y-2">
@@ -202,7 +211,7 @@ export function ItemForm({
                 }
               />
               <input
-                className={`${field} tabular w-28 shrink-0`}
+                className={`${field} w-28 shrink-0 font-mono`}
                 inputMode="numeric"
                 placeholder="₦"
                 value={v.price}
@@ -214,7 +223,7 @@ export function ItemForm({
                 type="button"
                 onClick={() => setVariants((arr) => arr.filter((_, j) => j !== i))}
                 aria-label={`Remove variant ${v.label || i + 1}`}
-                className="shrink-0 rounded-card border border-hairline/30 px-3 text-muted hover:text-accent"
+                className="shrink-0 rounded-sm border border-hairline px-3 text-text-secondary hover:text-danger-on-soft"
               >
                 ×
               </button>
@@ -224,27 +233,57 @@ export function ItemForm({
         <button
           type="button"
           onClick={() => setVariants((arr) => [...arr, { label: "", price: "" }])}
-          className="mt-2 rounded-card border border-hairline/30 px-3 py-1.5 text-xs text-muted hover:text-porcelain"
+          className="mt-2 rounded-sm border border-hairline px-3 py-1.5 text-xs text-text-secondary hover:border-hairline-strong hover:text-text"
         >
           + Add variant
         </button>
       </div>
 
+      {/* ── Detail ── */}
+      <SectionHead>Detail</SectionHead>
+      <div className="grid grid-cols-2 gap-3">
+        <div>
+          <span className={label}>Spice level</span>
+          <select className={field} {...register("spice_level")}>
+            <option value="0" className="bg-surface">None</option>
+            <option value="1" className="bg-surface">Mild</option>
+            <option value="2" className="bg-surface">Medium</option>
+            <option value="3" className="bg-surface">Hot</option>
+          </select>
+        </div>
+        <div>
+          <span className={label}>Prep time (min)</span>
+          <input className={`${field} font-mono`} inputMode="numeric" {...register("prep_time_minutes")} />
+        </div>
+      </div>
+      <div>
+        <span className={label}>Dietary</span>
+        <div className="flex flex-wrap gap-3">
+          {DIETARY.map((d) => (
+            <label key={d.value} className="flex items-center gap-1.5 text-sm text-text">
+              <input type="checkbox" value={d.value} {...register("dietary_tags")} className={check} />
+              {d.label}
+            </label>
+          ))}
+        </div>
+      </div>
+      <div>
+        <span className={label}>Allergens (comma-separated)</span>
+        <input className={field} placeholder="gluten, soy, egg" {...register("allergens_text")} />
+      </div>
       {modifierGroups.length > 0 && (
         <div>
           <span className={label}>Add-on groups</span>
           <div className="flex flex-wrap gap-x-4 gap-y-2">
             {modifierGroups.map((g) => (
-              <label key={g.id} className="flex items-center gap-1.5 text-sm text-porcelain">
+              <label key={g.id} className="flex items-center gap-1.5 text-sm text-text">
                 <input
                   type="checkbox"
                   checked={modGroupIds.includes(g.id)}
                   onChange={(e) =>
-                    setModGroupIds((ids) =>
-                      e.target.checked ? [...ids, g.id] : ids.filter((x) => x !== g.id),
-                    )
+                    setModGroupIds((ids) => (e.target.checked ? [...ids, g.id] : ids.filter((x) => x !== g.id)))
                   }
-                  className="accent-[var(--color-lacquer)]"
+                  className={check}
                 />
                 {g.name}
               </label>
@@ -253,68 +292,29 @@ export function ItemForm({
         </div>
       )}
 
-      <div className="grid grid-cols-2 gap-3">
-        <div>
-          <span className={label}>Spice level</span>
-          <select className={field} {...register("spice_level")}>
-            <option value="0" className="bg-ink">
-              None
-            </option>
-            <option value="1" className="bg-ink">
-              Mild
-            </option>
-            <option value="2" className="bg-ink">
-              Medium
-            </option>
-            <option value="3" className="bg-ink">
-              Hot
-            </option>
-          </select>
-        </div>
-        <div>
-          <span className={label}>Prep time (min)</span>
-          <input className={`${field} tabular`} inputMode="numeric" {...register("prep_time_minutes")} />
-        </div>
-      </div>
-
-      <div>
-        <span className={label}>Dietary</span>
-        <div className="flex flex-wrap gap-3">
-          {DIETARY.map((d) => (
-            <label key={d.value} className="flex items-center gap-1.5 text-sm text-porcelain">
-              <input type="checkbox" value={d.value} {...register("dietary_tags")} className="accent-[var(--color-lacquer)]" />
-              {d.label}
-            </label>
-          ))}
-        </div>
-      </div>
-
-      <div>
-        <span className={label}>Allergens (comma-separated)</span>
-        <input className={field} placeholder="gluten, soy, egg" {...register("allergens_text")} />
-      </div>
-
-      <div className="flex flex-wrap gap-5 pt-1">
-        <label className="flex items-center gap-2 text-sm text-porcelain">
-          <input type="checkbox" {...register("is_featured")} className="accent-[var(--color-lacquer)]" /> Chef&apos;s pick
+      {/* ── Status ── */}
+      <SectionHead>Status</SectionHead>
+      <div className="flex flex-wrap gap-5">
+        <label className="flex items-center gap-2 text-sm text-text">
+          <input type="checkbox" {...register("is_featured")} className={check} /> Chef&apos;s pick
         </label>
-        <label className="flex items-center gap-2 text-sm text-porcelain">
-          <input type="checkbox" {...register("is_available")} className="accent-[var(--color-lacquer)]" /> Available
+        <label className="flex items-center gap-2 text-sm text-text">
+          <input type="checkbox" {...register("is_available")} className={check} /> Available
         </label>
       </div>
 
-      <div className="flex gap-2 pt-2">
+      <div className="flex gap-2 pt-3">
         <button
           type="submit"
           disabled={isSubmitting}
-          className="rounded-card bg-accent px-4 py-2.5 text-sm font-medium text-porcelain outline-none hover:opacity-90 focus-visible:ring-2 focus-visible:ring-accent/70 disabled:opacity-50"
+          className="rounded-sm bg-accent px-5 py-2.5 text-sm font-semibold uppercase tracking-[0.08em] text-on-accent outline-none transition-colors hover:bg-accent-hover focus-visible:ring-2 focus-visible:ring-accent/50 disabled:opacity-50"
         >
           {isSubmitting ? "Saving…" : editing ? "Save changes" : "Create item"}
         </button>
         <button
           type="button"
           onClick={() => router.push(returnTo)}
-          className="rounded-card border border-hairline/30 px-4 py-2.5 text-sm text-muted hover:text-porcelain"
+          className="rounded-sm border border-hairline px-5 py-2.5 text-sm text-text-secondary outline-none transition-colors hover:border-hairline-strong hover:text-text focus-visible:ring-2 focus-visible:ring-accent/50"
         >
           Cancel
         </button>
