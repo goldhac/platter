@@ -109,7 +109,7 @@ export function SettingsForm({
     <form onSubmit={onSubmit} className="max-w-3xl space-y-5">
       {/* ── Venue ── */}
       <SectionHead>Venue</SectionHead>
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         <div>
           <span className={label}>Restaurant name</span>
           <input className={field} value={form.name} onChange={(e) => set("name", e.target.value)} />
@@ -123,7 +123,7 @@ export function SettingsForm({
           />
         </div>
       </div>
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         <div>
           <span className={label}>Phone</span>
           <input className={field} value={form.phone} onChange={(e) => set("phone", e.target.value)} />
@@ -174,7 +174,7 @@ export function SettingsForm({
 
       {/* ── Money & display ── */}
       <SectionHead>Money &amp; display</SectionHead>
-      <div className="grid grid-cols-3 gap-3">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
         <div>
           <span className={label}>Currency</span>
           <select
@@ -216,7 +216,7 @@ export function SettingsForm({
 
       <div className="rounded-sm border border-hairline p-3">
         <span className={label}>Second currency on prices (optional)</span>
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
           <input
             className={`${field} font-mono`}
             maxLength={3}

@@ -46,7 +46,7 @@ export default function Concierge({ venue, m, venueName }: { venue: string; m?: 
         type="button"
         onClick={() => setOpen((o) => !o)}
         aria-label={open ? "Close menu assistant" : "Ask the menu assistant"}
-        className="fixed bottom-5 right-5 z-40 flex h-12 items-center gap-2 rounded-full bg-accent px-4 text-sm font-semibold text-on-accent shadow-plate outline-none transition-transform hover:scale-105 focus-visible:ring-2 focus-visible:ring-accent/70"
+        className="fixed bottom-[calc(1.25rem+env(safe-area-inset-bottom))] right-5 z-40 flex h-12 items-center gap-2 rounded-full bg-accent px-4 text-sm font-semibold text-on-accent shadow-plate outline-none transition-transform hover:scale-105 focus-visible:ring-2 focus-visible:ring-accent/70"
       >
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
           {open ? <path d="M18 6 6 18M6 6l12 12" /> : <><path d="M12 2a7 7 0 0 0-7 7c0 2.4 1.2 4.5 3 5.7V17a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1v-2.3c1.8-1.2 3-3.3 3-5.7a7 7 0 0 0-7-7Z" /><path d="M9 21h6" /></>}
@@ -55,7 +55,7 @@ export default function Concierge({ venue, m, venueName }: { venue: string; m?: 
       </button>
 
       {open && (
-        <div className="fixed bottom-20 right-5 z-40 flex max-h-[70vh] w-[min(360px,calc(100vw-2.5rem))] flex-col overflow-hidden rounded-2xl border border-hairline/30 bg-surface shadow-plate">
+        <div className="fixed bottom-[calc(5rem+env(safe-area-inset-bottom))] right-5 z-40 flex max-h-[70vh] w-[min(360px,calc(100vw-2.5rem))] flex-col overflow-hidden rounded-2xl border border-hairline/30 bg-surface shadow-plate">
           <div className="border-b border-hairline/20 px-4 py-3">
             <p className="font-display text-sm text-text-on-surface">Menu assistant</p>
             <p className="text-[0.7rem] text-text-secondary">Ask anything about {venueName}’s menu</p>

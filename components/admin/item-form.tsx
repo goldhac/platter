@@ -180,7 +180,7 @@ export function ItemForm({
 
       {/* ── Price ── */}
       <SectionHead>Price</SectionHead>
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         <div>
           <span className={label}>Price (₦)</span>
           <input
@@ -241,7 +241,7 @@ export function ItemForm({
 
       {/* ── Detail ── */}
       <SectionHead>Detail</SectionHead>
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         <div>
           <span className={label}>Spice level</span>
           <select className={field} {...register("spice_level")}>
