@@ -383,11 +383,12 @@ function ItemBody({ item, money }: { item: AdminItem; money: MoneyOpts }) {
       >
         Edit
       </Link>
+      {/* Dup/Del are hidden on phones — they live in the BulkBar (select the row). §3.4 */}
       <button
         type="button"
         onClick={dup}
         disabled={pending}
-        className="tabular text-[0.65rem] uppercase tracking-wider text-muted hover:text-porcelain"
+        className="tabular hidden text-[0.65rem] uppercase tracking-wider text-muted hover:text-porcelain sm:inline"
       >
         Dup
       </button>
@@ -395,7 +396,7 @@ function ItemBody({ item, money }: { item: AdminItem; money: MoneyOpts }) {
         type="button"
         onClick={del}
         disabled={pending}
-        className="tabular text-[0.65rem] uppercase tracking-wider text-muted hover:text-accent"
+        className="tabular hidden text-[0.65rem] uppercase tracking-wider text-muted hover:text-accent sm:inline"
       >
         Del
       </button>
@@ -438,7 +439,7 @@ function BulkBar({
     "rounded-card border border-hairline/30 px-2.5 py-1.5 text-muted outline-none hover:text-porcelain disabled:opacity-50";
 
   return (
-    <div className="fixed inset-x-0 bottom-0 z-30 border-t border-hairline/25 bg-ink/95 backdrop-blur">
+    <div className="fixed inset-x-0 bottom-0 z-50 border-t border-hairline/25 bg-ink/95 pb-[env(safe-area-inset-bottom)] backdrop-blur">
       <div className="mx-auto flex max-w-3xl flex-wrap items-center gap-2 px-5 py-3 text-xs">
         <span className="tabular mr-1 text-porcelain">{ids.length} selected</span>
         <button type="button" disabled={pending} onClick={() => run(() => bulkSetAvailable(ids, false), "Marked sold out")} className={btn}>

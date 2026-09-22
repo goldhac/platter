@@ -209,7 +209,7 @@ export function MenuBoard({
                   })
                 }
                 className={cn(
-                  "tabular shrink-0 rounded-card px-3 py-1.5 text-[0.7rem] uppercase tracking-wider outline-none focus-visible:ring-2 focus-visible:ring-accent/70",
+                  "tabular inline-flex min-h-[44px] shrink-0 items-center rounded-card px-3.5 text-[0.72rem] uppercase tracking-wider outline-none focus-visible:ring-2 focus-visible:ring-accent/70",
                   on ? "bg-accent text-text" : "border border-hairline/30 text-text-secondary hover:text-text",
                 )}
               >

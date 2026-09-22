@@ -28,7 +28,7 @@ export function CategoryRail({ categories }: { categories: Chip[] }) {
           .sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top)[0];
         if (topmost) setActive(topmost.target.id.replace("cat-", ""));
       },
-      { rootMargin: "-136px 0px -60% 0px", threshold: 0 },
+      { rootMargin: "-158px 0px -55% 0px", threshold: 0 },
     );
     sections.forEach((s) => observer.observe(s));
     return () => observer.disconnect();
@@ -63,7 +63,7 @@ export function CategoryRail({ categories }: { categories: Chip[] }) {
               setActive(c.slug);
             }}
             className={cn(
-              "tabular shrink-0 rounded-card px-3 py-2 text-xs uppercase tracking-wider outline-none transition-colors",
+              "tabular inline-flex min-h-[44px] shrink-0 items-center rounded-card px-3.5 text-xs uppercase tracking-wider outline-none transition-colors",
               "focus-visible:ring-2 focus-visible:ring-accent/70",
               isActive ? "bg-accent text-text" : "text-text-secondary hover:text-text",
             )}
