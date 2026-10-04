@@ -40,9 +40,25 @@ const plexMono = IBM_Plex_Mono({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000"),
+  // Falls back to the live host, not localhost. metadataBase is what every relative OG URL is
+  // resolved against, so if NEXT_PUBLIC_SITE_URL is ever missing in the deployed environment the
+  // card would point at http://localhost:3000/opengraph-image — a URL no unfurler can fetch, and
+  // a link preview that silently shows nothing with no error anywhere to explain it.
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? "https://platter.goldhac.com"),
   title: { default: "Platter — digital menus for restaurants", template: "%s" },
   description: "Turn your paper menu into a beautiful digital menu in minutes.",
+  // Stated explicitly rather than left to fall back to <title> and the description meta. Unfurlers
+  // differ in how far they will fall back, and og:title is the one line every one of them reads.
+  openGraph: {
+    title: "Platter — digital menus for restaurants",
+    description: "Turn your paper menu into a beautiful digital menu in minutes.",
+    type: "website",
+    siteName: "Platter",
+    url: "/",
+  },
+  // og:image comes from app/opengraph-image.tsx; this makes X render it as a large card
+  // (X falls back to og:image when twitter:image is absent). Title/description unfurl from above.
+  twitter: { card: "summary_large_image" },
 };
 
 const gaId = process.env.NEXT_PUBLIC_GA_ID;
