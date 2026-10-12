@@ -6,14 +6,24 @@ import { Seal } from "./seal-mark";
  * while it loads. Without one (~80% of items): the chamfered-octagon seal on a debossed plate —
  * the intentional fallback, never a grey box.
  */
-export function ItemThumb({ src, alt, size = 74 }: { src: string | null; alt: string; size?: number }) {
+export function ItemThumb({
+  src,
+  alt,
+  size = 74,
+  priority = false,
+}: {
+  src: string | null;
+  alt: string;
+  size?: number;
+  priority?: boolean;
+}) {
   if (src) {
     return (
       <span
         className="img-skeleton relative block shrink-0 overflow-hidden rounded-sm border border-hairline"
         style={{ width: size, height: size }}
       >
-        <Image src={src} alt={alt} fill sizes={`${size}px`} className="object-cover" />
+        <Image src={src} alt={alt} fill priority={priority} sizes={`${size}px`} className="object-cover" />
       </span>
     );
   }

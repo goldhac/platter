@@ -74,6 +74,19 @@ export async function MenuScreen({
   const layout = resolveTheme(themeId, themeConfig).layout;
   const { Item, listClassName } = layoutSpec(layout);
 
+  /**
+   * The LCP image: the first item on the page that actually has a photo.
+   *
+   * Walked in render order — "Most ordered" when it has enough items to show, then the grouped
+   * categories — because that is what a phone paints largest. Items without a photo render a seal
+   * mark instead, so making one of those eager would buy nothing and still cost a preload. Exactly
+   * one item gets it: a second eager image competes with the first and with the stylesheet.
+   */
+  const showPopular = menu.popular.length >= 3;
+  const lcpItemId = (showPopular ? menu.popular : [])
+    .concat(menu.groups.flatMap((g) => g.categories.flatMap((c) => c.items)))
+    .find((i) => i.image_url)?.id;
+
   // A shared deep link to an item that no longer exists → 404, not a broken sheet.
   if (initialItemSlug && !menu.itemsBySlug[initialItemSlug]) notFound();
 
@@ -119,6 +132,10 @@ export async function MenuScreen({
         />
         <MenuSwitcher menus={menu.menus} activeSlug={menu.activeMenuSlug} />
 
+        {/* The LCP image. Items render in this order — "Most ordered" when it has enough items,
+            then the grouped categories — so the first one WITH a photo is what a phone paints
+            largest. Items without an image show a seal mark, and making that eager would buy
+            nothing while still costing a preload. */}
         <MenuBoard
           itemsBySlug={menu.itemsBySlug}
           money={money}
@@ -131,7 +148,7 @@ export async function MenuScreen({
           venueName={menu.restaurant.name}
         >
           <div className="pb-28">
-            {menu.popular.length >= 3 && (
+            {showPopular && (
               <section className="menu-section pt-8" aria-labelledby="pop-heading">
                 <div className="flex items-center gap-2.5 pb-3.5">
                   <span id="pop-heading" className="font-mono text-[10px] uppercase tracking-[0.2em] text-hairline-strong">
@@ -146,7 +163,7 @@ export async function MenuScreen({
                 <ul className={listClassName}>
                   {menu.popular.map((item) => (
                     <li key={`pop-${item.id}`} className={isAdmin ? "group relative" : undefined}>
-                      <Item item={item} money={money} basePath={basePath} />
+                      <Item item={item} money={money} basePath={basePath} priority={item.id === lcpItemId} />
                       {isAdmin && <ItemAdminControls item={item} />}
                     </li>
                   ))}
@@ -181,7 +198,7 @@ export async function MenuScreen({
                             isAdmin && item.status !== "published" ? "" : undefined
                           }
                         >
-                          <Item item={item} money={money} basePath={basePath} />
+                          <Item item={item} money={money} basePath={basePath} priority={item.id === lcpItemId} />
                           {isAdmin && <ItemAdminControls item={item} />}
                         </li>
                       ))}

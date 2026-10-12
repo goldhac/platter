@@ -13,10 +13,15 @@ export function CardItem({
   item,
   money,
   basePath = "/menu",
+  priority = false,
 }: {
   item: MenuItem;
   money: MoneyOpts;
   basePath?: string;
+  /** The one above-the-fold image. Next sets eager loading, fetchpriority=high and a preload
+   *  link, so the LCP image is not queued behind the lazy ones. Exactly one item on the page
+   *  gets this: more eager images compete with each other and with the CSS. */
+  priority?: boolean;
 }) {
   const soldOut = !item.is_available;
   const price =
@@ -38,6 +43,7 @@ export function CardItem({
           <Image
             src={item.image_url}
             alt={item.name}
+            priority={priority}
             fill
             sizes="(max-width: 640px) 50vw, 280px"
             className="object-cover"

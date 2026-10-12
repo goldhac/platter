@@ -7,7 +7,13 @@ import { RuledItem } from "./ruled-item";
 import { CardItem } from "./card-item";
 import { EditorialItem } from "./editorial-item";
 
-export type ItemComponent = ComponentType<{ item: MenuItem; money: MoneyOpts; basePath?: string }>;
+export type ItemComponent = ComponentType<{
+  item: MenuItem;
+  money: MoneyOpts;
+  basePath?: string;
+  /** Set on the single LCP item so its image loads eagerly. RuledItem has no image and ignores it. */
+  priority?: boolean;
+}>;
 export type LayoutSpec = { Item: ItemComponent; listClassName: string };
 
 /**
