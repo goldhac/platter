@@ -1,0 +1,44 @@
+# Keep the Supabase project from pausing.
+#
+# Free-tier projects pause after ~7 days of inactivity. On 2026-10-12 the sibling project
+# (cramsheet) was found paused: auth and REST unreachable, nobody able to sign in, and every page
+# still returning 200 — so it looked healthy and only failed on use. Platter is on the same plan
+# and the same clock. For a QR menu that is worse than a dead marketing page: the failure lands on
+# a guest at a table who scanned a code.
+#
+# Twice a week beats the 7-day clock with room to spare (max gap: Thu -> Mon).
+#
+# The request is a real PostgREST query rather than a ping at the gateway, so it proves Postgres
+# itself answered. `memberships` is deliberate: RLS is on and it has NO anon policy, so anon always
+# gets 200 with an empty array — a live database, and nobody's data. It selects `user_id` because
+# this table has no `id` column; selecting a column that does not exist returns 400 and would make
+# this alarm cry wolf forever.
+#
+# A non-200 fails the job, so this doubles as a free outage alarm: GitHub emails on failure.
+name: Keep Supabase warm
+
+on:
+  schedule:
+    - cron: "41 7 * * 1,4" # Mon & Thu, 07:41 UTC (offset from Clutch's job)
+  workflow_dispatch: # so it can be run by hand after an outage
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Query Postgres through PostgREST
+        env:
+          ANON: ${{ secrets.SUPABASE_ANON_KEY }}
+        run: |
+          set -euo pipefail
+          url="https://bnyadozvvyzlzwnelrfu.supabase.co/rest/v1/memberships?select=user_id&limit=1"
+          code=$(curl -sS -o /tmp/body -w '%{http_code}' --max-time 30 \
+            -H "apikey: $ANON" -H "Authorization: Bearer $ANON" "$url")
+          echo "HTTP $code"
+          if [ "$code" != "200" ]; then
+            echo "Supabase did not answer with 200 — the project may be paused or down."
+            head -c 400 /tmp/body || true
+            exit 1
+          fi
+          echo "Postgres answered; the pause clock is reset."
